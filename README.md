@@ -2,9 +2,7 @@
 
 **36 hours. Real infrastructure. European AI sovereignty.**
 
-Welcome to the central repository for Zero One Hack_01, hosted by [Lumos Consulting](https://lumos-consulting.at) at [AI Factory Austria](https://aifactory.at) in Vienna, with compute provided by [HPE](https://www.hpe.com) on the Leonardo GPU Cluster (64× A100s).
-
-This is not a basic-LLM-wrapper hackathon. We're here to build infrastructure-level AI on European compute, with real corporate problem statements and 36 hours to ship.
+Welcome to the central repository for Zero One Hack_01, hosted by [Lumos Consulting](https://lumos-consulting.at) at [AI Factory Austria](https://aifactory.at) in Vienna, with compute provided by [CINECA](CINECA) on the Leonardo GPU Cluster.
 
 ---
 
@@ -13,7 +11,6 @@ This is not a basic-LLM-wrapper hackathon. We're here to build infrastructure-le
 - 🌐 **Docs**: [docs.zero-one.lumos-consulting.at](https://docs.zero-one.lumos-consulting.at/)
 - 💬 **Discord**: https://discord.gg/e6rrVbcD5
 - 📍 **Venue**: AI Factory Austria (AI:AT), Vienna
-- 
 
 ---
 
@@ -29,66 +26,23 @@ Each track's full briefing, data, and starter materials live in [`/tracks/`](./t
 
 ---
 
-## Schedule
-
-### Friday, 29 May
-| Time  | What                                            |
-| ----- | ----------------------------------------------- |
-| 18:00 | Doors open, registration, drinks                |
-| 19:00 | Opening keynote                                 |
-| 19:30 | Track presentations (UNIQA, Infineon, Sybilion) |
-| 20:30 | Team formation, track commitment                |
-| 21:00 | **Hacking starts**                              |
-| 23:00 | Kitchen closes (food available throughout)      |
-
-### Saturday, 30 May
-| Time  | What                                  |
-| ----- | ------------------------------------- |
-| 08:00 | Breakfast                             |
-| 10:00 | Workshop: Leonardo cluster onboarding |
-| 12:30 | Lunch                                 |
-| 14:00 | Mentor office hours (per track)       |
-| 18:00 | Dinner                                |
-| 20:00 | Optional: lightning talks             |
-| 24:00 | Quiet hours (venue stays open)        |
-
-### Sunday, 31 May
-| Time  | What                                            |
-| ----- | ----------------------------------------------- |
-| 08:00 | Breakfast                                       |
-| 09:00 | **Submission deadline (PRs open)**              |
-| 09:00 | Final 6 hours: polish demos, prep presentations |
-| 13:00 | Lunch                                           |
-| 14:00 | **Submission deadline (PRs locked)**            |
-| 14:30 | Final presentations begin                       |
-| 17:30 | Jury deliberation                               |
-| 18:30 | Awards ceremony                                 |
-| 19:30 | Closing drinks                                  |
-
-Schedule may shift by ±30 min — check Slack `#announcements` for live updates.
-
----
-
 ## What's provided
 
-- **Compute**: Leonardo GPU Cluster (A100s). Per-team quota and access instructions in [`/infrastructure/leonardo_access.md`](./infrastructure/leonardo_access.md).
-- **Food & drinks**: All meals, snacks, coffee, soft drinks throughout. Dietary requirements collected at registration.
+- **Compute**: Leonardo GPU Cluster (A100s). 
 - **Workspace**: Power, fast WiFi, monitors on request, breakout rooms for team calls.
 - **Mentors**: Domain experts from each partner company, plus ML/infra mentors from Lumos and HPE.
 - **API credits and tokens**: Track-specific, documented in each track's README.
 
 
 ---
-
 ## How submissions work
 
-1. **Fork this repo**
-2. Work in your fork under `/submissions/{your-team-name}/`
-3. Open a **Pull Request** to this repo by Sunday 10:00 — the PR timestamp is your submission timestamp
-4. Each PR must include the deliverables listed in [`/submission/TEMPLATE.md`](./submission/TEMPLATE.md)
-5. After 10:00, PRs are locked. No edits, no exceptions.
+1. **Fill out the Tally submission form** by Sunday 10:00 — link will be shared in `#announcements`
+2. The form takes four fields: team name, repository URL, slides (PDF), and demo video (file or link, max 2 minutes)
+3. The Tally form timestamp is your official submission time
+4. After 10:00 the form closes. No late submissions.
 
-Late commits within your own fork are fine — only the PR timestamp matters.
+Full submission details, requirements, and the pre-submission checklist live in [`/submission/SUBMISSION.md`](./submission/SUBMISSION.md).
 
 ---
 
