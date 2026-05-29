@@ -73,6 +73,16 @@ def split_records(records, val_per_family: int = 100, seed: int = 0):
     return train, val
 
 
+def lofo_split(records, hold_out: str, seed: int = 0):
+    """Leave-one-family-out: train on every family except `hold_out`, evaluate on
+    `hold_out` — a stand-in for the hidden 4th family (OOD / Task 4)."""
+    hold_out = hold_out.lower()
+    train = [r for r in records if r[0] != hold_out]
+    test = [r for r in records if r[0] == hold_out]
+    random.Random(seed).shuffle(train)
+    return train, test
+
+
 class SequenceDataset(torch.utils.data.Dataset):
     """Yields a 1D LongTensor of token ids ([BOS, FAM, steps..., EOS]) per record."""
 

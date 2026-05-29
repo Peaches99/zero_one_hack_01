@@ -65,3 +65,71 @@ def completion_metrics(preds: list[list[str]], truths: list[list[str]]) -> dict:
         "token_accuracy": tok_correct / max(tok_total, 1),
         "n": n,
     }
+
+
+# --- Block-level (process-logic) view: synonym- and optional-step-tolerant ---
+
+def step_category(step: str) -> str:
+    """Coarse functional category of a step (heuristic proxy for 'block').
+
+    Collapses synonyms (DEPOSIT TOP METAL / DEPOSIT METAL 1 -> DEPOSIT) so we
+    measure whether the *process logic* is right, not the exact wording. This is
+    our own proxy until the organizers' eval_metrics.py defines block accuracy.
+    """
+    s = step.upper()
+    if s in {"RECEIVE WAFER LOT", "LOT IDENTIFICATION", "LOT RELEASE",
+             "FINAL LOT RELEASE", "SHIP LOT", "PACKAGE PREPARATION"}:
+        return "LOGISTICS"
+    if s.startswith("MEASURE") or "INSPECT" in s or s.startswith("FINAL ") or s.endswith("CHECK"):
+        return "METROLOGY"
+    if "TEST" in s or s == "YIELD ANALYSIS":
+        return "TEST"
+    if "IMPLANT" in s:
+        return "IMPLANT"
+    if "ETCH" in s and "CLEAN" not in s:
+        return "ETCH"
+    if any(k in s for k in ("CLEAN", "RCA", "HF DIP", "RINSE", "DRY WAFER",
+                            "OXIDE STRIP", "SURFACE PREP", "PRE CLEAN")):
+        return "CLEAN"
+    if "STRIP" in s:
+        return "STRIP"
+    if "CMP" in s:
+        return "CMP"
+    if "FILL VIA" in s:
+        return "VIA_FILL"
+    if any(k in s for k in ("SPIN COAT", "SOFT BAKE", "ALIGN MASK", "EXPOSE LITHO",
+                            "POST EXPOSE BAKE", "DEVELOP", "HARD BAKE", "PAD WINDOW LITHO")):
+        return "LITHO"
+    if any(k in s for k in ("ANNEAL", "DRIVE IN DIFFUSION", "DENSIFY", "CURE")):
+        return "THERMAL"
+    if any(k in s for k in ("DEPOSIT", "THERMAL OXIDATION", "GATE OXIDE",
+                            "EPITAXIAL DEPOSITION", "FIELD OXIDE", "PAD OXIDE", "PASSIVATION")):
+        return "DEPOSIT"
+    if any(k in s for k in ("EPITAX", "SUBSTRATE", "GRIND", "BACKSIDE")):
+        return "PREP"
+    return "OTHER"
+
+
+def block_sequence(steps: list[str]) -> list[str]:
+    """Map steps to categories and collapse consecutive duplicates -> block flow."""
+    out: list[str] = []
+    for s in steps:
+        c = step_category(s)
+        if not out or out[-1] != c:
+            out.append(c)
+    return out
+
+
+def blocklevel_metrics(preds: list[list[str]], truths: list[list[str]]) -> dict:
+    """Block-flow exact match and normalized edit distance (synonym-tolerant)."""
+    n = len(truths)
+    if n == 0:
+        return {"block_exact_match": 0.0, "block_norm_edit_distance": 0.0, "n": 0}
+    exact = 0
+    ned = 0.0
+    for p, t in zip(preds, truths):
+        pb, tb = block_sequence(p), block_sequence(t)
+        if pb == tb:
+            exact += 1
+        ned += edit_distance(pb, tb) / max(len(tb), len(pb), 1)
+    return {"block_exact_match": exact / n, "block_norm_edit_distance": ned / n, "n": n}

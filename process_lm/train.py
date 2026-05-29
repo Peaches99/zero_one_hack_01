@@ -13,7 +13,7 @@ import torch
 from torch.utils.data import DataLoader
 
 from .data import (
-    SequenceDataset, build_records, load_all_families, make_collate, split_records,
+    SequenceDataset, build_records, load_all_families, lofo_split, make_collate, split_records,
 )
 from .model import GPT, GPTConfig
 from .tokenizer import Tokenizer
@@ -56,6 +56,8 @@ def main():
     p.add_argument("--family-dropout", type=float, default=0.0,
                    help="prob of masking the family token (OOD robustness; try 0.15)")
     p.add_argument("--val-per-family", type=int, default=100)
+    p.add_argument("--hold-out-family", default=None, choices=["mosfet", "igbt", "ic"],
+                   help="leave-one-family-out: train on the other two, validate on this (OOD)")
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--device", default=None)
     args = p.parse_args()
@@ -67,10 +69,16 @@ def main():
 
     by_family = load_all_families(Path(args.data_dir))
     records = build_records(by_family)
-    tok = Tokenizer.from_sequences({i: s for i, (_, s) in enumerate(records)})
+    if args.hold_out_family:
+        train_recs, val_recs = lofo_split(records, args.hold_out_family, args.seed)
+        print(f"LOFO: holding out '{args.hold_out_family}' "
+              f"(train {len(train_recs)} / OOD-val {len(val_recs)})")
+    else:
+        train_recs, val_recs = split_records(records, args.val_per_family, args.seed)
+    # Build the tokenizer from TRAIN ONLY so a held-out family's unique steps are
+    # genuinely unknown (<UNK>) — the honest OOD setup.
+    tok = Tokenizer.from_sequences({i: s for i, (_, s) in enumerate(train_recs)})
     tok.save(out / "tokenizer.json")
-
-    train_recs, val_recs = split_records(records, args.val_per_family, args.seed)
     print(f"vocab={tok.vocab_size}  train={len(train_recs)}  val={len(val_recs)}  device={device}")
 
     collate = make_collate(tok.pad_id)

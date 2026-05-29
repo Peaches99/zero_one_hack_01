@@ -15,7 +15,7 @@ from pathlib import Path
 import torch
 
 from .data import build_records, load_all_families, split_records
-from .metrics import completion_metrics, nextstep_metrics
+from .metrics import blocklevel_metrics, completion_metrics, nextstep_metrics
 from .model import GPT, GPTConfig
 from .tokenizer import SPECIAL_TOKENS, Tokenizer
 
@@ -87,6 +87,8 @@ def main():
     p.add_argument("--ckpt", default="process_lm/runs/v1/best.pt")
     p.add_argument("--data-dir", default="tracks/industrial-infineon/training_data")
     p.add_argument("--mode", choices=["nextstep", "completion", "sanity", "demo"], default="nextstep")
+    p.add_argument("--eval-family", default=None, choices=["mosfet", "igbt", "ic"],
+                   help="restrict evaluation to one family's held-out sequences (ID vs OOD)")
     p.add_argument("--val-per-family", type=int, default=100)
     p.add_argument("--limit", type=int, default=0, help="cap #val sequences (0 = all)")
     p.add_argument("--seed", type=int, default=0)
@@ -99,6 +101,8 @@ def main():
 
     records = build_records(load_all_families(Path(args.data_dir)))
     _, val_recs = split_records(records, args.val_per_family, args.seed)
+    if args.eval_family:
+        val_recs = [r for r in val_recs if r[0] == args.eval_family.lower()]
     if args.limit:
         val_recs = val_recs[:args.limit]
 
@@ -111,12 +115,30 @@ def main():
         print(nextstep_metrics(ranked, truths))
 
     elif args.mode == "completion":
-        preds, truths = [], []
+        validate = load_validator(args.data_dir)
+        preds, truths, partials = [], [], []
         for fam, steps in val_recs:
             for cut in _cuts(steps):
                 preds.append(complete(model, tok, fam, steps[:cut], device))
                 truths.append(steps[cut:])
+                partials.append(steps[:cut])
         print(completion_metrics(preds, truths))
+        print(blocklevel_metrics(preds, truths))
+        if validate is not None and preds:
+            matched = valid_diff = invalid = 0
+            for part, pr, tr in zip(partials, preds, truths):
+                if pr == tr:
+                    matched += 1
+                elif len(validate(part + pr)) == 0:
+                    valid_diff += 1
+                else:
+                    invalid += 1
+            n = len(preds)
+            print(f"correctness breakdown over {n} completions:")
+            print(f"  exact match            : {matched / n:.3f}")
+            print(f"  valid but different    : {valid_diff / n:.3f}   <- legal route, different coin-flips")
+            print(f"  invalid (rule-breaking): {invalid / n:.3f}")
+            print(f"  -> process-valid total : {(matched + valid_diff) / n:.3f}")
 
     elif args.mode == "sanity":
         validate = load_validator(args.data_dir)
