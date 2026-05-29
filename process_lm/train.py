@@ -6,6 +6,7 @@ Run from the repo root:
 from __future__ import annotations
 
 import argparse
+import random
 import time
 from pathlib import Path
 
@@ -59,6 +60,14 @@ def main():
     p.add_argument("--val-per-family", type=int, default=100)
     p.add_argument("--hold-out-family", default=None, choices=["mosfet", "igbt", "ic"],
                    help="leave-one-family-out: train on the other two, validate on this (OOD)")
+    p.add_argument("--add-hybrids", type=int, default=0,
+                   help="add N validated hybrid pseudo-family routes to training (OOD robustness)")
+    p.add_argument("--hybrid-tag", default="hybrid",
+                   help="family tag for hybrid routes (set 'random' to vary per-route)")
+    p.add_argument("--train-limit", type=int, default=0,
+                   help="cap real training sequences before augmentation (0=all; data-scaling axis)")
+    p.add_argument("--extra-per-family", type=int, default=0,
+                   help="generate N extra real validated sequences per family (scale data volume up)")
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--device", default=None)
     p.add_argument("--force", action="store_true",
@@ -79,6 +88,44 @@ def main():
               f"(train {len(train_recs)} / OOD-val {len(val_recs)})")
     else:
         train_recs, val_recs = split_records(records, args.val_per_family, args.seed)
+
+    # Scale real data UP: generate extra validated per-family sequences from the
+    # organizers' grammar (combinatoric space is billions+, so these are fresh).
+    if args.extra_per_family > 0:
+        from .diversify import _DATA_DIR  # noqa: F401  (ensures generator import path)
+        from generate_sequences import generate_dataset  # type: ignore
+        pool_fams = [f for f in ("mosfet", "igbt", "ic") if f != args.hold_out_family]
+        extra = []
+        for fam in pool_fams:
+            for s in generate_dataset(fam, args.extra_per_family, seed=args.seed + hash(fam) % 1000):
+                extra.append((fam, s))
+        train_recs = list(train_recs) + extra
+        print(f"scale-up: +{len(extra)} extra real sequences "
+              f"({args.extra_per_family}/family across {pool_fams})")
+
+    # Scale real data DOWN: cap before augmentation (the data-volume scaling axis).
+    if args.train_limit > 0:
+        random.Random(args.seed).shuffle(train_recs)
+        train_recs = train_recs[:args.train_limit]
+        print(f"train-limit: capped to {len(train_recs)} real sequences")
+
+    # Optionally augment TRAIN with validated hybrid pseudo-family routes. During
+    # LOFO, draw hybrids only from the trained families so the held-out family
+    # stays genuinely unseen (honest OOD test).
+    if args.add_hybrids > 0:
+        from .diversify import FAMILIES, generate_diverse_records
+        pool = [f for f in FAMILIES if f != args.hold_out_family] if args.hold_out_family else None
+        hybrids = generate_diverse_records(args.add_hybrids, seed=args.seed, pool=pool)
+        if args.hybrid_tag == "random":
+            import random as _r
+            rng_tag = _r.Random(args.seed)
+            hybrids = [(rng_tag.choice(FAMILIES), s) for _, s in hybrids]
+        elif args.hybrid_tag != "hybrid":
+            hybrids = [(args.hybrid_tag, s) for _, s in hybrids]
+        train_recs = list(train_recs) + hybrids
+        random.Random(args.seed).shuffle(train_recs)
+        print(f"augment: +{len(hybrids)} hybrid routes "
+              f"(pool={pool or 'all'}, tag={args.hybrid_tag}) -> train {len(train_recs)}")
     # Build the tokenizer from TRAIN ONLY so a held-out family's unique steps are
     # genuinely unknown (<UNK>) — the honest OOD setup.
     tok = Tokenizer.from_sequences({i: s for i, (_, s) in enumerate(train_recs)})
