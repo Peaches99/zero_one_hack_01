@@ -16,6 +16,7 @@ from .data import (
     SequenceDataset, build_records, load_all_families, lofo_split, make_collate, split_records,
 )
 from .model import GPT, GPTConfig
+from .runguard import acquire
 from .tokenizer import Tokenizer
 
 
@@ -60,8 +61,11 @@ def main():
                    help="leave-one-family-out: train on the other two, validate on this (OOD)")
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--device", default=None)
+    p.add_argument("--force", action="store_true",
+                   help="bypass the single-instance training lock (use with care)")
     args = p.parse_args()
 
+    acquire(force=args.force)  # refuse to run a 2nd concurrent MPS job (RAM safety)
     torch.manual_seed(args.seed)
     device = get_device(args.device)
     out = Path(args.out_dir)
