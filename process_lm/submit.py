@@ -95,19 +95,24 @@ def write_nextstep(model, tok, valid_rows, device, out):
             w.writerow([eid, *preds[:5]])
 
 
-def write_completion(model, tok, valid_rows, device, out, guided=False):
-    gen = repair = None
-    if guided:
+def write_completion(model, tok, valid_rows, device, out, mode="greedy"):
+    if mode == "guided":
         from .guided import complete_guided, repair_route
-        gen, repair = complete_guided, repair_route
+    elif mode == "mbrblk":
+        import torch
+        from .decode_lab import mbr_block_complete
+        torch.manual_seed(0)  # reproducible sampling for the submission
     with open(out, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["EXAMPLE_ID", "PREDICTED_SEQUENCE"])
         for row in valid_rows:
             eid, fam, _frac, partial = row[0], row[1], row[2], row[3]
-            comp = gen(model, tok, fam, partial, device) if gen else complete(model, tok, fam, partial, device)
-            if repair:  # grammar repair: supply a skipped mandatory passivation block
-                comp = repair(list(partial) + comp)[len(partial):]
+            if mode == "mbrblk":  # block-consensus MBR: verified +Block-acc/Token-acc
+                comp = mbr_block_complete(model, tok, fam, partial, device, k=12, temperature=0.5)
+            elif mode == "guided":
+                comp = repair_route(list(partial) + complete_guided(model, tok, fam, partial, device))[len(partial):]
+            else:
+                comp = complete(model, tok, fam, partial, device)
             w.writerow([eid, "|".join(comp)])
 
 
@@ -148,8 +153,9 @@ def main() -> None:
                     help="model=pure LM surprise (detect+attribute); hybrid=LM detects, "
                          "validator names the rule (default); oracle=validator for both")
     ap.add_argument("--anomaly-thr", type=float, default=6.0)
-    ap.add_argument("--guided", action="store_true",
-                    help="validity-guided decoding for Task 2 (guarantees rule-valid routes)")
+    ap.add_argument("--completion-mode", default="greedy", choices=["greedy", "guided", "mbrblk"],
+                    help="Task 2 decoding: greedy; guided (validity veto); mbrblk "
+                         "(block-consensus MBR — verified small Block-acc/Token-acc gain)")
     ap.add_argument("--device", default=None)
     args = ap.parse_args()
 
@@ -168,9 +174,9 @@ def main() -> None:
 
     if valid_rows:
         write_nextstep(model, tok, valid_rows, device, out_dir / "task1_nextstep.csv")
-        write_completion(model, tok, valid_rows, device, out_dir / "task2_completion.csv", guided=args.guided)
+        write_completion(model, tok, valid_rows, device, out_dir / "task2_completion.csv", mode=args.completion_mode)
         print(f"wrote task1_nextstep.csv + task2_completion.csv ({len(valid_rows)} rows, "
-              f"guided={args.guided})")
+              f"completion-mode={args.completion_mode})")
     if anomaly_rows:
         write_anomaly(model, tok, anomaly_rows, device, out_dir / "task3_anomaly.csv",
                       args.anomaly_thr, args.anomaly_mode)

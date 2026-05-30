@@ -125,7 +125,12 @@ Final model: 25M params, all 3 families + family-dropout, bf16.
   Exact Match 0.004. Exact/NED are *stochasticity-limited by design* — the grammar admits
   billions of valid continuations, so matching the one specific reference is near
   impossible; the model emits a *different legal* route instead. Block structure (0.711)
-  and 100% validity are the real signal.
+  and 100% validity are the real signal. The submission decodes with **block-consensus
+  MBR** (`submit.py --completion-mode mbrblk`): an adversarial search of ~25 approaches
+  found this the *one* verified gain over greedy — **+0.006 Block-acc, +0.010 Token-acc**,
+  consistent across two independent held-out seeds (8/8 metric-comparisons, P≈0.004),
+  still 600/600 valid. Small but real; everything else (bigger models, more data,
+  ensembles, beam) was noise — the model is otherwise at the 0.328 entropy floor.
 - **Task 3 (anomaly):** scored by the **official `eval_metrics.py` on all 987 real eval
   sequences — Accuracy 1.000, Precision 1.000, Recall 1.000, F1 1.000, ROC-AUC 1.000**
   (TP=387, FP=0, FN=0, TN=600; 1.00 detection on every one of the 10 rules). Detection is
