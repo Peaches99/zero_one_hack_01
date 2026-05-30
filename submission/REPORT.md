@@ -8,6 +8,18 @@ base), a custom data generator, an exact entropy oracle, and self-scoring for al
 three eval tasks. Everything runs on one RTX 5090; the whole study reproduces in
 well under an hour.
 
+### Headline results
+| Result | Number |
+|---|---|
+| Exact ID entropy floor (proven, byte-identical generator selftest) | **0.328 nats/token** |
+| Final model ID loss vs floor (fresh data) | 0.331 — **gap < 0.005** |
+| Loss on deterministic, rule-forced transitions (54% of tokens) | **0.0002 nats** (≪ 0.01) |
+| Task 1 next-step (ID) | top-3 0.997, **top-5 1.000**, MRR 0.838 |
+| Task 2 completion (ID) | **100% process-valid**, block-edit-dist 0.022 |
+| Task 3 anomaly detection | **ROC-AUC 1.000, F1 1.000, all 10 rules** |
+| OOD valid-completion w/ validity-guided decoding (IGBT) | 0.62 → **1.00** |
+| OOD next-step top-1 across families/seeds | 0.65 ± 0.04 (no lever beats noise) |
+
 ---
 
 ## 0. The one idea that organizes everything
@@ -137,13 +149,21 @@ MOSFET (valid 0.76 → 0.96) yet tank IGBT (0.66 → 0.48). MOSFET and IGBT are
 structurally harder to reach from the other two (real valid 0.76 / 0.66) than IC
 (0.98).
 
-**And the differences are within noise.** Re-running `real` and `real +
-family-dropout` with three seeds each (hold-out IC) gives **identical means — OOD
-top-1 0.602 ± 0.04 for both** — with a seed-to-seed range (0.535–0.65) that *dwarfs*
-every lever gap in the tables above. The single-seed gaps that looked like wins are
-run-to-run variance. This is the cleanest check that we did not fool ourselves:
-there is no robust lever effect to find. The honest recipe is **real data** (light
-family-dropout is harmless, not helpful).
+**And the differences are within noise — confirmed across every family and seed.**
+Re-running `real` vs `real + family-dropout` with 3–4 seeds per held-out family
+(OOD top-1, `<UNK>` token, mean ± std):
+
+| hold-out | real | real + family-dropout |
+|---|---|---|
+| IC | 0.602 ± 0.049 | 0.602 ± 0.034 |
+| MOSFET | 0.601 ± 0.032 | 0.604 ± 0.028 |
+| IGBT | 0.682 ± 0.028 | 0.675 ± 0.030 |
+
+**For every family the family-dropout effect is ≤ 0.007 — far inside the ±0.03–0.05
+seed noise.** The pooled spread across 22 runs (0.535–0.715) is driven by seed and
+which family is held out, not the lever. The single-seed gaps that looked like wins
+were variance. There is no robust training-time lever to find — the honest recipe is
+**plain real data**.
 
 Honest takeaways:
 1. **A clean small model already generalizes near its achievable limit from real
