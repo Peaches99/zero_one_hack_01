@@ -6,6 +6,7 @@ Run from the repo root:
 from __future__ import annotations
 
 import argparse
+import contextlib
 import random
 import time
 from pathlib import Path
@@ -19,6 +20,15 @@ from .data import (
 from .model import GPT, GPTConfig
 from .runguard import acquire
 from .tokenizer import Tokenizer
+
+
+def _amp_ctx(device: str):
+    """bf16 autocast on CUDA: enables flash attention (O(T) attention memory) and
+    the 5090's tensor cores. fp32 forced SDPA to the math kernel — O(B*H*T^2)
+    memory (an 85M model OOM-thrashed ~30 GB and ran 23x slow). No-op off CUDA."""
+    if device == "cuda":
+        return torch.autocast("cuda", dtype=torch.bfloat16)
+    return contextlib.nullcontext()
 
 
 def get_device(explicit: str | None = None) -> str:
@@ -37,7 +47,8 @@ def evaluate(model, dl, device) -> float:
     with torch.no_grad():
         for x, y in dl:
             x, y = x.to(device), y.to(device)
-            _, loss = model(x, y)
+            with _amp_ctx(device):
+                _, loss = model(x, y)
             tot += loss.item() * x.size(0)
             n += x.size(0)
     return tot / max(n, 1)
@@ -64,6 +75,10 @@ def main():
                    help="add N validated hybrid pseudo-family routes to training (OOD robustness)")
     p.add_argument("--hybrid-tag", default="hybrid",
                    help="family tag for hybrid routes (set 'random' to vary per-route)")
+    p.add_argument("--add-v2", type=int, default=0,
+                   help="add N validated v2 max-diversity routes (variable cycle count) to training")
+    p.add_argument("--v2-tag", default="random",
+                   help="family tag for v2 routes ('random' varies per-route)")
     p.add_argument("--train-limit", type=int, default=0,
                    help="cap real training sequences before augmentation (0=all; data-scaling axis)")
     p.add_argument("--extra-per-family", type=int, default=0,
@@ -126,6 +141,18 @@ def main():
         random.Random(args.seed).shuffle(train_recs)
         print(f"augment: +{len(hybrids)} hybrid routes "
               f"(pool={pool or 'all'}, tag={args.hybrid_tag}) -> train {len(train_recs)}")
+
+    # Optionally augment TRAIN with v2 max-diversity routes (variable cycle count,
+    # mixed-family blocks, optional 2nd metal). Pool-restricted during LOFO so the
+    # held-out family stays unseen (structural generalization, not family leakage).
+    if args.add_v2 > 0:
+        from .diversify2 import FAMILIES as V2_FAMILIES, generate_v2
+        v2_pool = [f for f in V2_FAMILIES if f != args.hold_out_family] if args.hold_out_family else None
+        v2recs = generate_v2(args.add_v2, seed=args.seed + 7, pool=v2_pool, tag=args.v2_tag)
+        train_recs = list(train_recs) + v2recs
+        random.Random(args.seed + 1).shuffle(train_recs)
+        print(f"augment-v2: +{len(v2recs)} v2 routes "
+              f"(pool={v2_pool or 'all'}, tag={args.v2_tag}) -> train {len(train_recs)}")
     # Build the tokenizer from TRAIN ONLY so a held-out family's unique steps are
     # genuinely unknown (<UNK>) — the honest OOD setup.
     tok = Tokenizer.from_sequences({i: s for i, (_, s) in enumerate(train_recs)})
@@ -160,7 +187,8 @@ def main():
         tot, n = 0.0, 0
         for x, y in train_dl:
             x, y = x.to(device), y.to(device)
-            _, loss = model(x, y)
+            with _amp_ctx(device):
+                _, loss = model(x, y)
             opt.zero_grad(set_to_none=True)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)

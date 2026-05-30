@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import atexit
 import os
+import sys
 import tempfile
 from pathlib import Path
 
@@ -16,8 +17,33 @@ LOCK = Path(tempfile.gettempdir()) / "process_lm_train.lock"
 
 
 def _alive(pid: int) -> bool:
+    """True if a process with this PID is currently running.
+
+    POSIX uses the signal-0 existence check. On Windows, ``os.kill(pid, 0)``
+    would *terminate* the target via TerminateProcess (Python maps any sig
+    other than CTRL_*_EVENT to a kill), so we query liveness through the Win32
+    API instead and never signal anything.
+    """
+    if pid <= 0:
+        return False
+    if sys.platform == "win32":
+        import ctypes
+        from ctypes import wintypes
+        PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+        STILL_ACTIVE = 259
+        kernel32 = ctypes.windll.kernel32
+        handle = kernel32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, pid)
+        if not handle:
+            return False  # no such process (or access denied) -> treat as gone
+        try:
+            code = wintypes.DWORD()
+            if kernel32.GetExitCodeProcess(handle, ctypes.byref(code)):
+                return code.value == STILL_ACTIVE
+            return True
+        finally:
+            kernel32.CloseHandle(handle)
     try:
-        os.kill(pid, 0)  # signal 0 = existence check, doesn't actually signal
+        os.kill(pid, 0)  # signal 0 = existence check (POSIX); does not signal
     except ProcessLookupError:
         return False
     except PermissionError:
