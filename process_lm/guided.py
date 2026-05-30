@@ -76,6 +76,30 @@ def complete_guided(model, tok, family, partial, device, k=8, max_new=250):
     return cur[len(partial):]
 
 
+# A self-contained, rule-valid passivation block (starts with its own clean so the
+# DEPOSIT PASSIVATION has a clean within 12; provides the CURE the downstream steps
+# require). Used to repair the one failure greedy/guided can't: the model skipping
+# passivation and jumping to the backside/test, which it cannot insert by veto alone.
+_PASSIVATION_BLOCK = [
+    "HF DIP", "DEPOSIT PASSIVATION", "CURE PASSIVATION", "MEASURE PASSIVATION THICKNESS",
+    "OPEN PAD WINDOW", "PAD WINDOW LITHO", "DEVELOP PHOTORESIST",
+    "PASSIVATION ETCH PAD OPENING", "STRIP RESIST", "CLEAN PAD OPENING",
+]
+
+
+def repair_route(steps):
+    """Insert a passivation block before the first step that requires it, if
+    CURE PASSIVATION is missing. Grammar-aware repair: the model proposes, the
+    grammar both vetoes illegal steps and supplies mandatory prerequisites."""
+    if "CURE PASSIVATION" in steps:
+        return steps
+    need = set(gs.ELECTRICAL_TEST_STEPS) | {"DEPOSIT BACKSIDE METAL"}
+    idx = next((i for i, s in enumerate(steps) if s in need), None)
+    if idx is None:
+        return steps
+    return steps[:idx] + _PASSIVATION_BLOCK + steps[idx:]
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--ckpt", required=True)
@@ -91,20 +115,22 @@ def main():
     _, val = split_records(recs, 100, 0)
     held = [r for r in val if r[0] == args.family][: args.limit]
 
-    g_ok = gd_ok = n = 0
+    g_ok = gd_ok = rp_ok = n = 0
     for fam, steps in held:
         for frac in (0.6, 0.8):
             cut = max(1, int(len(steps) * frac))
             part = steps[:cut]
             greedy = complete(model, tok, fam, part, device)
             guided = complete_guided(model, tok, fam, part, device)
+            repaired = repair_route(part + guided)
             n += 1
             g_ok += len(gs.validate_sequence(part + greedy)) == 0
             gd_ok += len(gs.validate_sequence(part + guided)) == 0
+            rp_ok += len(gs.validate_sequence(repaired)) == 0
     print(f"OOD valid-completion on held-out {args.family.upper()} (n={n}):")
-    print(f"  greedy decoding         : {g_ok/n:.3f}")
-    print(f"  validity-guided decoding: {gd_ok/n:.3f}")
-    print(f"  -> guided {'+' if gd_ok>=g_ok else ''}{(gd_ok-g_ok)/n:.3f}")
+    print(f"  greedy decoding             : {g_ok/n:.3f}")
+    print(f"  validity-guided decoding    : {gd_ok/n:.3f}")
+    print(f"  guided + passivation repair : {rp_ok/n:.3f}")
 
 
 if __name__ == "__main__":

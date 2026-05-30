@@ -17,7 +17,7 @@ well under an hour.
 | Task 1 next-step (ID) | top-3 0.997, **top-5 1.000**, MRR 0.838 |
 | Task 2 completion (ID) | **100% process-valid**, block-edit-dist 0.022 |
 | Task 3 anomaly detection | **ROC-AUC 1.000, F1 1.000, all 10 rules** |
-| OOD valid-completion w/ validity-guided decoding (IGBT) | 0.62 → **1.00** |
+| OOD valid-completion, guided+repair decoding (all 3 held-out families) | → **1.000** |
 | OOD next-step top-1 across families/seeds | 0.65 ± 0.04 (no lever beats noise) |
 
 ---
@@ -181,12 +181,16 @@ family-specific, and *wrong* recommendation. Cross-family robustness is the guar
 **The one lever that robustly helps is at inference, not training.**
 Validity-guided decoding (`process_lm/guided.py`) — the model proposes each next
 step, the validator vetoes any choice that would introduce a rule violation —
-lifts held-out **valid-completion from 0.62 → 1.00 (IGBT)** and 0.73 → 0.82
-(MOSFET), and **never hurts** (it can only veto illegal steps). The completions are
-genuine full routes ending in `SHIP LOT`. The model supplies the process
-knowledge; the validator supplies a guardrail. This is the honest way to guarantee
-legal routes for a family the model has never seen — a model+rules hybrid, not a
-bigger model or more data.
+lifts held-out **valid-completion toward 1.0 — IGBT 0.62 → 1.00, IC 0.98 → 1.00,
+MOSFET 0.73 → 0.82** — and **never hurts** (it can only veto illegal steps).
+MOSFET's residual failures are a single mode: the model skips passivation and jumps
+to the backside, which a veto cannot insert. Adding a one-block **grammar repair**
+that supplies the missing mandatory passivation pushes **all three held-out
+families to 1.000** valid-completion. The completions are genuine full routes ending
+in `SHIP LOT`. The model supplies the process knowledge; the grammar supplies a
+guardrail — vetoing illegal steps and inserting mandatory prerequisites. This is the
+honest way to guarantee legal routes for a family the model has never seen: a
+model+rules hybrid, not a bigger model or more data.
 
 ---
 

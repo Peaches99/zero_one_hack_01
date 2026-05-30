@@ -96,16 +96,18 @@ def write_nextstep(model, tok, valid_rows, device, out):
 
 
 def write_completion(model, tok, valid_rows, device, out, guided=False):
-    gen = None
+    gen = repair = None
     if guided:
-        from .guided import complete_guided
-        gen = complete_guided
+        from .guided import complete_guided, repair_route
+        gen, repair = complete_guided, repair_route
     with open(out, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["EXAMPLE_ID", "PREDICTED_SEQUENCE"])
         for row in valid_rows:
             eid, fam, _frac, partial = row[0], row[1], row[2], row[3]
             comp = gen(model, tok, fam, partial, device) if gen else complete(model, tok, fam, partial, device)
+            if repair:  # grammar repair: supply a skipped mandatory passivation block
+                comp = repair(list(partial) + comp)[len(partial):]
             w.writerow([eid, "|".join(comp)])
 
 
