@@ -1,0 +1,10 @@
+# Process-Logic LM (Infineon track) — dependencies.
+#
+# RTX 50-series / Blackwell GPUs (compute capability sm_120) require the
+# CUDA 12.8 PyTorch build. The extra index below provides it and is also
+# compatible with older NVIDIA GPUs. On Apple Silicon / CPU, plain `torch`
+# from PyPI works (the code auto-detects MPS / CUDA / CPU).
+--extra-index-url https://download.pytorch.org/whl/cu128
+torch>=2.7
+numpy>=1.26
+matplotlib>=3.8
