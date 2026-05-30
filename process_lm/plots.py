@@ -160,11 +160,33 @@ def fig_floor_split():
     fig.tight_layout(); fig.savefig(FIG / "floor_split.png", dpi=130); plt.close(fig)
 
 
+def fig_position_accuracy():
+    """ID vs held-out next-step top-1 by position decile (from lofo_analysis.json)."""
+    p = RUNS / "lofo_analysis.json"
+    if not p.exists():
+        return
+    d = json.loads(p.read_text())
+    fams = [f for f in ("mosfet", "igbt", "ic") if f in d.get("families", {})]
+    fig, axes = plt.subplots(1, len(fams), figsize=(4.3 * len(fams), 4), sharey=True)
+    if len(fams) == 1:
+        axes = [axes]
+    xs = [(i + 0.5) / 10 for i in range(10)]
+    for ax, f in zip(axes, fams):
+        fam = d["families"][f]
+        ax.plot(xs, fam["id_pos_acc"], "o-", label="ID (trained)")
+        ax.plot(xs, fam["ood_pos_acc"], "s--", label="OOD (held-out)")
+        ax.set_title(f"hold-out {f.upper()}"); ax.set_xlabel("position in route")
+        ax.set_ylim(0, 1.02); ax.grid(alpha=0.3)
+    axes[0].set_ylabel("next-step top-1"); axes[0].legend(fontsize=8)
+    fig.suptitle("Where generalization holds: top-1 by route position (ID vs held-out family)")
+    fig.tight_layout(); fig.savefig(FIG / "position_accuracy.png", dpi=130); plt.close(fig)
+
+
 def main() -> None:
     FIG.mkdir(parents=True, exist_ok=True)
     made = []
     for fn in (fig_loss_curves, fig_scaling, fig_hybrid_dose, fig_levers,
-               fig_guided_decoding, fig_floor_split):
+               fig_guided_decoding, fig_floor_split, fig_position_accuracy):
         try:
             fn()
             made.append(fn.__name__)
