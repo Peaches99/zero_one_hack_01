@@ -246,6 +246,24 @@ At the 60/80% evaluation cut points the OOV rate is lower (~2%), so the model's
 process logic + irreducible coin-flips, not vocabulary. The remaining ID→OOD logic
 gap is small (ID top-1 ≈ 0.74 vs OOD 0.635) and no lever in §4 closed it.
 
+**The generalization gap, decomposed (the Task 4 deliverable).**
+`process_lm/lofo_analysis.py` trains a full model plus three leave-one-out models and
+splits the ID→OOD next-step drop into a LOGIC gap (shared steps applied in an
+unfamiliar context) and a VOCAB floor (held-out-unique steps the model cannot name):
+
+| held-out | ID top-1 | OOD top-1 | OOD top-5 | drop | logic gap | vocab floor | OOD valid-compl |
+|---|---|---|---|---|---|---|---|
+| MOSFET | 0.695 | 0.590 | **1.000** | 0.105 | 0.105 | 0.000 | 0.76 → 1.00 |
+| IGBT | 0.745 | 0.720 | **0.975** | 0.025 | 0.007 | 0.025 | 0.81 → 1.00 |
+| IC | 0.635 | 0.630 | **0.980** | 0.005 | −0.008 | 0.020 | 0.98 → 1.00 |
+
+(OOD valid-compl shown greedy → guided+repair.) The drop is small and almost entirely
+*logic*, not vocabulary — and **OOD top-5 stays 0.975–1.000**: the true next step is in
+the model's top 5 even for a family it never trained on. MOSFET (the most
+structurally distinct — epitaxy, spacers, LDD) has the largest logic gap; IGBT and IC
+transfer almost perfectly. Full per-position deciles + NLL/perplexity are saved to
+`runs/lofo_analysis.json`.
+
 We tested the obvious vocabulary-gap fix directly — **word-level tokenization**
 (`process_lm/wordlevel.py`): each step becomes its words plus `<ENDSTEP>`, so an
 unseen step can be composed from known words. It **backfired**: OOD top-1 fell to

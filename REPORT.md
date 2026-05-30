@@ -98,9 +98,11 @@ Final model: 25M params, all 3 families + family-dropout, bf16.
   edit distance 0.022; 60/60 valid routes generated from scratch.
 - **Task 3 (anomaly):** LM-surprise detector **ROC-AUC 1.000, F1 1.000, all 10
   rules** (clean margin: valid ≤ 8.3 nats, violations ≥ 10.2).
-- **Task 4 (OOD), valid-completion with guided+repair decoding: 1.000 for all three
-  held-out families** (MOSFET 0.73→1.00, IGBT 0.62→1.00, IC 0.98→1.00). OOD next-step
-  top-1 ≈ 0.65 (near the vocabulary ceiling).
+- **Task 4 (OOD generalization):** the ID→OOD next-step drop is **small and almost
+  entirely logic** (MOSFET 0.105, IGBT 0.025, IC ≈0; vocab floor ≤ 0.025), and **OOD
+  top-5 stays 0.975–1.000** — the right step is in the top 5 even for a family the
+  model never trained on. Valid-completion with guided+repair: **1.000 for all three
+  held-out families** (MOSFET 0.73→1.00, IGBT 0.62→1.00, IC 0.98→1.00).
 - **Baseline comparison:** an untrained model with the same architecture produces
   150–220-step routes with dozens of rule violations and misses every next-step;
   see `python -m process_lm.demo`. Scaling baselines (data 200→20k, models 0.5M→85M)

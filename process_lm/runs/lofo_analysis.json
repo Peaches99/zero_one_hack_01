@@ -1,0 +1,535 @@
+{
+  "vocab": {
+    "mosfet": {
+      "n_steps": 137,
+      "n_unique": 20,
+      "unique": [
+        "ANISOTROPIC ETCH SPACER",
+        "DEPOSIT SPACER DIELECTRIC",
+        "EPITAXIAL DEPOSITION",
+        "EPITAXY ANNEAL",
+        "EPITAXY PREP",
+        "GATE OXIDE GROWTH",
+        "GATE OXIDE PREP",
+        "IMPLANT LDD",
+        "IMPLANT SOURCE DRAIN",
+        "IMPLANT WELL",
+        "LIGHT ANNEAL",
+        "MEASURE GATE OXIDE THICKNESS",
+        "MEASURE JUNCTION PROFILE",
+        "MEASURE SPACER WIDTH",
+        "METAL ETCH",
+        "OXIDE ETCH",
+        "PATTERN INSPECTION LEVEL 1",
+        "POLYSILICON ETCH",
+        "SUBSTRATE CHECK",
+        "WAFER SURFACE CLEAN"
+      ]
+    },
+    "igbt": {
+      "n_steps": 147,
+      "n_unique": 27,
+      "unique": [
+        "ALIGN MASK LEVEL 5",
+        "ALIGN MASK LEVEL 6",
+        "ANNEAL DIELECTRIC",
+        "BREAKDOWN VOLTAGE TEST",
+        "CLEAN AFTER FIELD ETCH",
+        "CLEAN AFTER OXIDE ETCH",
+        "CLEAN AFTER WINDOW ETCH",
+        "DEPOSIT FIELD OXIDE",
+        "DEPOSIT GATE OXIDE OR DIELECTRIC",
+        "EPITAXIAL LAYER PREP",
+        "EPITAXIAL REWORK CHECK",
+        "EPITAXIAL WAFER CHECK",
+        "ETCH SILICON OR OXIDE WINDOW",
+        "EXPOSE LITHO LEVEL 5",
+        "EXPOSE LITHO LEVEL 6",
+        "FIELD OXIDE ETCH",
+        "FIELD PATTERN INSPECTION",
+        "IMPLANT CHANNEL STOP",
+        "IMPLANT DRAIN / CATHODE REGION",
+        "IMPLANT N BUFFER",
+        "IMPLANT P BODY",
+        "IMPLANT SOURCE REGION",
+        "MEASURE DEVICE PARAMETER",
+        "MEASURE OXIDE QUALITY",
+        "MEASURE SURFACE UNIFORMITY",
+        "MEASURE WINDOW CD",
+        "P BODY WINDOW INSPECTION"
+      ]
+    },
+    "ic": {
+      "n_steps": 130,
+      "n_unique": 29,
+      "unique": [
+        "ANNEAL OXIDE",
+        "ANNEAL POLYSILICON",
+        "BACKSIDE CLEAN FINAL",
+        "BACKSIDE THINNING CHECK",
+        "DEPOSIT BACKSIDE PROTECTION",
+        "DEPOSIT PAD OXIDE",
+        "DEPOSIT TUNGSTEN SEED",
+        "DRY WAFER BACKSIDE",
+        "ETCH WET BACKSIDE",
+        "FILL VIA TUNGSTEN",
+        "FINAL ELECTRICAL TEST PREP",
+        "FINAL OXIDE CHECK",
+        "FRONTSIDE CLEAN FINAL",
+        "GRINDING WAFER BACKSIDE",
+        "IMPLANT N-TYPE",
+        "MEASURE BACKSIDE ROUGHNESS",
+        "MEASURE CD LEVEL 1",
+        "MEASURE CD LEVEL 2",
+        "MEASURE GEOMETRY",
+        "MEASURE INITIAL GEOMETRY",
+        "MEASURE SURFACE DEFECTS",
+        "OXIDE STRIP",
+        "PACKAGE PREPARATION",
+        "PATTERN INSPECTION LEVEL 2",
+        "RINSE WET WAFER_EDGE",
+        "STRIP RESIST LEVEL 2",
+        "SURFACE PREP FOR DEPOSITION",
+        "WAFER CLEAN PRE PROCESS",
+        "WAFER CLEAN PRE-GRIND"
+      ]
+    }
+  },
+  "families": {
+    "mosfet": {
+      "id_nextstep": {
+        "overall": {
+          "top1": 0.695,
+          "top3": 1.0,
+          "top5": 1.0,
+          "mrr": 0.8466666666666667,
+          "n": 200
+        },
+        "shared_vocab_only": {
+          "top1": 0.695,
+          "top3": 1.0,
+          "top5": 1.0,
+          "mrr": 0.8466666666666667,
+          "n": 200
+        },
+        "unique_target_frac": 0.0,
+        "by_cut": {
+          "0.6": {
+            "top1": 0.86,
+            "top3": 1.0,
+            "top5": 1.0,
+            "mrr": 0.9283333333333332,
+            "n": 100
+          },
+          "0.8": {
+            "top1": 0.53,
+            "top3": 1.0,
+            "top5": 1.0,
+            "mrr": 0.765,
+            "n": 100
+          }
+        }
+      },
+      "ood_nextstep": {
+        "overall": {
+          "top1": 0.59,
+          "top3": 0.995,
+          "top5": 1.0,
+          "mrr": 0.79375,
+          "n": 200
+        },
+        "shared_vocab_only": {
+          "top1": 0.59,
+          "top3": 0.995,
+          "top5": 1.0,
+          "mrr": 0.79375,
+          "n": 200
+        },
+        "unique_target_frac": 0.0,
+        "by_cut": {
+          "0.6": {
+            "top1": 0.7,
+            "top3": 0.99,
+            "top5": 1.0,
+            "mrr": 0.8475,
+            "n": 100
+          },
+          "0.8": {
+            "top1": 0.48,
+            "top3": 1.0,
+            "top5": 1.0,
+            "mrr": 0.74,
+            "n": 100
+          }
+        }
+      },
+      "ood_nextstep_unk": {
+        "overall": {
+          "top1": 0.59,
+          "top3": 0.995,
+          "top5": 1.0,
+          "mrr": 0.79375,
+          "n": 200
+        },
+        "shared_vocab_only": {
+          "top1": 0.59,
+          "top3": 0.995,
+          "top5": 1.0,
+          "mrr": 0.79375,
+          "n": 200
+        },
+        "unique_target_frac": 0.0,
+        "by_cut": {
+          "0.6": {
+            "top1": 0.7,
+            "top3": 0.99,
+            "top5": 1.0,
+            "mrr": 0.8475,
+            "n": 100
+          },
+          "0.8": {
+            "top1": 0.48,
+            "top3": 1.0,
+            "top5": 1.0,
+            "mrr": 0.74,
+            "n": 100
+          }
+        }
+      },
+      "id_completion": {
+        "exact_match": 0.0,
+        "norm_edit_distance": 0.1716608484185481,
+        "token_accuracy": 0.4025802183261661,
+        "n": 80,
+        "block_exact_match": 0.6125,
+        "block_norm_edit_distance": 0.019917555243842002,
+        "valid_completion_rate": 1.0
+      },
+      "ood_completion": {
+        "exact_match": 0.0,
+        "norm_edit_distance": 0.4058397221346691,
+        "token_accuracy": 0.1346344690704598,
+        "n": 80,
+        "block_exact_match": 0.0,
+        "block_norm_edit_distance": 0.23999713918812499,
+        "valid_completion_rate": 0.7625
+      },
+      "id_nll": 0.31755029976382027,
+      "ood_nll": 2.1687810955981686,
+      "id_pos_acc": [
+        0.7557077625570776,
+        0.9676113360323887,
+        0.873015873015873,
+        0.8808080808080808,
+        0.7494908350305499,
+        0.7400793650793651,
+        0.772,
+        0.6893787575150301,
+        0.9138276553106213,
+        0.8440748440748441
+      ],
+      "ood_pos_acc": [
+        0.4794520547945205,
+        0.6295546558704453,
+        0.2619047619047619,
+        0.47878787878787876,
+        0.14663951120162932,
+        0.6309523809523809,
+        0.71,
+        0.5110220440881763,
+        0.749498997995992,
+        0.7713097713097713
+      ]
+    },
+    "igbt": {
+      "id_nextstep": {
+        "overall": {
+          "top1": 0.745,
+          "top3": 1.0,
+          "top5": 1.0,
+          "mrr": 0.8725,
+          "n": 200
+        },
+        "shared_vocab_only": {
+          "top1": 0.745,
+          "top3": 1.0,
+          "top5": 1.0,
+          "mrr": 0.8725,
+          "n": 200
+        },
+        "unique_target_frac": 0.0,
+        "by_cut": {
+          "0.6": {
+            "top1": 0.66,
+            "top3": 1.0,
+            "top5": 1.0,
+            "mrr": 0.83,
+            "n": 100
+          },
+          "0.8": {
+            "top1": 0.83,
+            "top3": 1.0,
+            "top5": 1.0,
+            "mrr": 0.915,
+            "n": 100
+          }
+        }
+      },
+      "ood_nextstep": {
+        "overall": {
+          "top1": 0.72,
+          "top3": 0.975,
+          "top5": 0.975,
+          "mrr": 0.8466666666666666,
+          "n": 200
+        },
+        "shared_vocab_only": {
+          "top1": 0.7384615384615385,
+          "top3": 1.0,
+          "top5": 1.0,
+          "mrr": 0.8683760683760683,
+          "n": 195
+        },
+        "unique_target_frac": 0.025,
+        "by_cut": {
+          "0.6": {
+            "top1": 0.65,
+            "top3": 0.95,
+            "top5": 0.95,
+            "mrr": 0.8,
+            "n": 100
+          },
+          "0.8": {
+            "top1": 0.79,
+            "top3": 1.0,
+            "top5": 1.0,
+            "mrr": 0.8933333333333334,
+            "n": 100
+          }
+        }
+      },
+      "ood_nextstep_unk": {
+        "overall": {
+          "top1": 0.715,
+          "top3": 0.975,
+          "top5": 0.975,
+          "mrr": 0.8441666666666666,
+          "n": 200
+        },
+        "shared_vocab_only": {
+          "top1": 0.7333333333333333,
+          "top3": 1.0,
+          "top5": 1.0,
+          "mrr": 0.8658119658119657,
+          "n": 195
+        },
+        "unique_target_frac": 0.025,
+        "by_cut": {
+          "0.6": {
+            "top1": 0.65,
+            "top3": 0.95,
+            "top5": 0.95,
+            "mrr": 0.8,
+            "n": 100
+          },
+          "0.8": {
+            "top1": 0.78,
+            "top3": 1.0,
+            "top5": 1.0,
+            "mrr": 0.8883333333333334,
+            "n": 100
+          }
+        }
+      },
+      "id_completion": {
+        "exact_match": 0.0,
+        "norm_edit_distance": 0.2162767600478825,
+        "token_accuracy": 0.41041433370660696,
+        "n": 80,
+        "block_exact_match": 0.525,
+        "block_norm_edit_distance": 0.028314511003054006,
+        "valid_completion_rate": 1.0
+      },
+      "ood_completion": {
+        "exact_match": 0.0,
+        "norm_edit_distance": 0.4093962185898111,
+        "token_accuracy": 0.10246360582306831,
+        "n": 80,
+        "block_exact_match": 0.0,
+        "block_norm_edit_distance": 0.23942698296993964,
+        "valid_completion_rate": 0.8125
+      },
+      "id_nll": 0.31443055579684104,
+      "ood_nll": 2.526860181622532,
+      "id_pos_acc": [
+        0.7984790874524715,
+        0.902027027027027,
+        0.8724489795918368,
+        0.8503401360544217,
+        0.8797250859106529,
+        0.7277310924369748,
+        0.7419898819561551,
+        0.7701543739279588,
+        0.7688442211055276,
+        0.8533568904593639
+      ],
+      "ood_pos_acc": [
+        0.435361216730038,
+        0.5320945945945946,
+        0.4710884353741497,
+        0.33503401360544216,
+        0.3642611683848797,
+        0.37815126050420167,
+        0.47892074198988194,
+        0.5351629502572899,
+        0.711892797319933,
+        0.6484098939929329
+      ]
+    },
+    "ic": {
+      "id_nextstep": {
+        "overall": {
+          "top1": 0.635,
+          "top3": 0.995,
+          "top5": 1.0,
+          "mrr": 0.8154166666666667,
+          "n": 200
+        },
+        "shared_vocab_only": {
+          "top1": 0.635,
+          "top3": 0.995,
+          "top5": 1.0,
+          "mrr": 0.8154166666666667,
+          "n": 200
+        },
+        "unique_target_frac": 0.0,
+        "by_cut": {
+          "0.6": {
+            "top1": 0.77,
+            "top3": 0.99,
+            "top5": 1.0,
+            "mrr": 0.8808333333333332,
+            "n": 100
+          },
+          "0.8": {
+            "top1": 0.5,
+            "top3": 1.0,
+            "top5": 1.0,
+            "mrr": 0.75,
+            "n": 100
+          }
+        }
+      },
+      "ood_nextstep": {
+        "overall": {
+          "top1": 0.63,
+          "top3": 0.955,
+          "top5": 0.98,
+          "mrr": 0.7979166666666667,
+          "n": 200
+        },
+        "shared_vocab_only": {
+          "top1": 0.6428571428571429,
+          "top3": 0.9744897959183674,
+          "top5": 1.0,
+          "mrr": 0.8142006802721089,
+          "n": 196
+        },
+        "unique_target_frac": 0.02,
+        "by_cut": {
+          "0.6": {
+            "top1": 0.71,
+            "top3": 0.91,
+            "top5": 0.96,
+            "mrr": 0.8208333333333333,
+            "n": 100
+          },
+          "0.8": {
+            "top1": 0.55,
+            "top3": 1.0,
+            "top5": 1.0,
+            "mrr": 0.775,
+            "n": 100
+          }
+        }
+      },
+      "ood_nextstep_unk": {
+        "overall": {
+          "top1": 0.615,
+          "top3": 0.955,
+          "top5": 0.98,
+          "mrr": 0.7904166666666668,
+          "n": 200
+        },
+        "shared_vocab_only": {
+          "top1": 0.6275510204081632,
+          "top3": 0.9744897959183674,
+          "top5": 1.0,
+          "mrr": 0.8065476190476191,
+          "n": 196
+        },
+        "unique_target_frac": 0.02,
+        "by_cut": {
+          "0.6": {
+            "top1": 0.66,
+            "top3": 0.91,
+            "top5": 0.96,
+            "mrr": 0.7958333333333333,
+            "n": 100
+          },
+          "0.8": {
+            "top1": 0.57,
+            "top3": 1.0,
+            "top5": 1.0,
+            "mrr": 0.785,
+            "n": 100
+          }
+        }
+      },
+      "id_completion": {
+        "exact_match": 0.0,
+        "norm_edit_distance": 0.30118260188344465,
+        "token_accuracy": 0.2820879513764748,
+        "n": 80,
+        "block_exact_match": 0.3375,
+        "block_norm_edit_distance": 0.05156074726551831,
+        "valid_completion_rate": 1.0
+      },
+      "ood_completion": {
+        "exact_match": 0.0,
+        "norm_edit_distance": 0.4858884349310756,
+        "token_accuracy": 0.18305327136217375,
+        "n": 80,
+        "block_exact_match": 0.0,
+        "block_norm_edit_distance": 0.27010368305757726,
+        "valid_completion_rate": 0.975
+      },
+      "id_nll": 0.3770487875447793,
+      "ood_nll": 2.68448677486717,
+      "id_pos_acc": [
+        0.65,
+        0.8605664488017429,
+        0.9264069264069265,
+        0.9190371991247265,
+        0.720620842572062,
+        0.6824034334763949,
+        0.7510822510822511,
+        0.7286652078774617,
+        0.7349137931034483,
+        0.7256235827664399
+      ],
+      "ood_pos_acc": [
+        0.375,
+        0.17647058823529413,
+        0.43722943722943725,
+        0.4201312910284464,
+        0.30376940133037694,
+        0.6416309012875536,
+        0.5432900432900433,
+        0.6345733041575492,
+        0.4073275862068966,
+        0.546485260770975
+      ]
+    }
+  }
+}

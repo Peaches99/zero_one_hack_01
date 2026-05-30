@@ -1,0 +1,141 @@
+vocab=206  train=2700  val=300  device=cuda
+params=4.86M
+epoch  1  train 2.7334  val 1.0377  (0.7s)
+epoch  2  train 0.7263  val 0.4373  (0.4s)
+epoch  3  train 0.4196  val 0.3782  (0.4s)
+epoch  4  train 0.3757  val 0.3589  (0.4s)
+epoch  5  train 0.3600  val 0.3503  (0.4s)
+epoch  6  train 0.3490  val 0.3464  (0.4s)
+epoch  7  train 0.3455  val 0.3426  (0.4s)
+epoch  8  train 0.3423  val 0.3415  (0.4s)
+epoch  9  train 0.3395  val 0.3411  (0.4s)
+epoch 10  train 0.3384  val 0.3391  (0.4s)
+epoch 11  train 0.3373  val 0.3358  (0.4s)
+epoch 12  train 0.3362  val 0.3383  (0.4s)
+epoch 13  train 0.3352  val 0.3364  (0.4s)
+epoch 14  train 0.3343  val 0.3376  (0.4s)
+epoch 15  train 0.3342  val 0.3361  (0.4s)
+done. best val loss 0.3358. checkpoints + log in process_lm\runs\full
+LOFO: holding out 'mosfet' (train 2000 / OOD-val 1000)
+vocab=186  train=2000  val=1000  device=cuda
+params=4.85M
+epoch  1  train 2.9771  val 2.4594  (0.6s)
+epoch  2  train 0.9313  val 2.1705  (0.3s)
+epoch  3  train 0.4836  val 2.2519  (0.3s)
+epoch  4  train 0.4038  val 2.3694  (0.3s)
+epoch  5  train 0.3789  val 2.4537  (0.3s)
+epoch  6  train 0.3628  val 2.5373  (0.3s)
+epoch  7  train 0.3557  val 2.6471  (0.3s)
+epoch  8  train 0.3520  val 2.7466  (0.3s)
+epoch  9  train 0.3489  val 3.0211  (0.3s)
+epoch 10  train 0.3472  val 3.0876  (0.3s)
+epoch 11  train 0.3444  val 3.2516  (0.3s)
+epoch 12  train 0.3437  val 3.3830  (0.3s)
+epoch 13  train 0.3433  val 3.2553  (0.3s)
+epoch 14  train 0.3413  val 3.3687  (0.3s)
+epoch 15  train 0.3411  val 3.4030  (0.3s)
+done. best val loss 2.1705. checkpoints + log in process_lm\runs\lofo_mosfet
+LOFO: holding out 'igbt' (train 2000 / OOD-val 1000)
+vocab=179  train=2000  val=1000  device=cuda
+params=4.85M
+epoch  1  train 2.8574  val 2.7652  (0.6s)
+epoch  2  train 0.8606  val 2.5153  (0.3s)
+epoch  3  train 0.4677  val 2.6326  (0.3s)
+epoch  4  train 0.3965  val 2.7933  (0.3s)
+epoch  5  train 0.3716  val 2.9239  (0.3s)
+epoch  6  train 0.3614  val 3.1878  (0.3s)
+epoch  7  train 0.3556  val 3.2676  (0.3s)
+epoch  8  train 0.3507  val 3.3580  (0.3s)
+epoch  9  train 0.3479  val 3.4592  (0.3s)
+epoch 10  train 0.3467  val 3.6455  (0.3s)
+epoch 11  train 0.3442  val 3.7434  (0.3s)
+epoch 12  train 0.3432  val 3.6962  (0.3s)
+epoch 13  train 0.3430  val 3.7307  (0.3s)
+epoch 14  train 0.3414  val 3.9159  (0.3s)
+epoch 15  train 0.3413  val 3.9351  (0.3s)
+done. best val loss 2.5153. checkpoints + log in process_lm\runs\lofo_igbt
+LOFO: holding out 'ic' (train 2000 / OOD-val 1000)
+vocab=177  train=2000  val=1000  device=cuda
+params=4.85M
+epoch  1  train 2.8366  val 3.0877  (0.6s)
+epoch  2  train 0.8562  val 2.6772  (0.3s)
+epoch  3  train 0.4415  val 2.7837  (0.3s)
+epoch  4  train 0.3684  val 2.9622  (0.3s)
+epoch  5  train 0.3457  val 3.0608  (0.3s)
+epoch  6  train 0.3318  val 3.2310  (0.3s)
+epoch  7  train 0.3265  val 3.4636  (0.3s)
+epoch  8  train 0.3221  val 3.5316  (0.3s)
+epoch  9  train 0.3197  val 3.7002  (0.3s)
+epoch 10  train 0.3180  val 3.7788  (0.3s)
+epoch 11  train 0.3166  val 3.8774  (0.3s)
+epoch 12  train 0.3158  val 3.9505  (0.3s)
+epoch 13  train 0.3146  val 4.0613  (0.3s)
+epoch 14  train 0.3137  val 4.0726  (0.3s)
+epoch 15  train 0.3139  val 4.1916  (0.3s)
+done. best val loss 2.6772. checkpoints + log in process_lm\runs\lofo_ic
+device=cuda
+
+=== Phase A: ensure checkpoints (foreground, one at a time) ===
+[train] C:\Users\nicol\Projects\zero_one_hack_01\.venv\Scripts\python.exe -m process_lm.train --epochs 15 --out-dir process_lm\runs\full
+[train] C:\Users\nicol\Projects\zero_one_hack_01\.venv\Scripts\python.exe -m process_lm.train --epochs 15 --out-dir process_lm\runs\lofo_mosfet --hold-out-family mosfet
+[train] C:\Users\nicol\Projects\zero_one_hack_01\.venv\Scripts\python.exe -m process_lm.train --epochs 15 --out-dir process_lm\runs\lofo_igbt --hold-out-family igbt
+[train] C:\Users\nicol\Projects\zero_one_hack_01\.venv\Scripts\python.exe -m process_lm.train --epochs 15 --out-dir process_lm\runs\lofo_ic --hold-out-family ic
+
+=== Phase B: vocabulary overlap (how OOD is each family?) ===
+  mosfet: 137 distinct steps, 20 unique to it (unseen if held out)
+          unique: ANISOTROPIC ETCH SPACER, DEPOSIT SPACER DIELECTRIC, EPITAXIAL DEPOSITION, EPITAXY ANNEAL, EPITAXY PREP, GATE OXIDE GROWTH, GATE OXIDE PREP, IMPLANT LDD …
+  igbt  : 147 distinct steps, 27 unique to it (unseen if held out)
+          unique: ALIGN MASK LEVEL 5, ALIGN MASK LEVEL 6, ANNEAL DIELECTRIC, BREAKDOWN VOLTAGE TEST, CLEAN AFTER FIELD ETCH, CLEAN AFTER OXIDE ETCH, CLEAN AFTER WINDOW ETCH, DEPOSIT FIELD OXIDE …
+  ic    : 130 distinct steps, 29 unique to it (unseen if held out)
+          unique: ANNEAL OXIDE, ANNEAL POLYSILICON, BACKSIDE CLEAN FINAL, BACKSIDE THINNING CHECK, DEPOSIT BACKSIDE PROTECTION, DEPOSIT PAD OXIDE, DEPOSIT TUNGSTEN SEED, DRY WAFER BACKSIDE …
+
+=== Phase C/D: per-family ID vs OOD ===
+
+--- held-out family: MOSFET (20 unique steps, 0.0% of targets unseen-vocab) ---
+  next-step ID            : top1=0.695 top3=1.000 top5=1.000 mrr=0.847
+  next-step OOD (fam tok) : top1=0.590 top3=0.995 top5=1.000 mrr=0.794
+  next-step OOD (unk tok) : top1=0.590 top3=0.995 top5=1.000 mrr=0.794
+  -- decomposition (shared-vocab targets only) --
+     ID  top1=0.695   OOD top1=0.590   LOGIC gap=+0.105
+     VOCAB gap (unique targets the OOD model cannot name): 0.000
+  completion ID           : tokAcc=0.403 blkNED=0.020 valid=1.000
+  completion OOD          : tokAcc=0.135 blkNED=0.240 valid=0.762
+  mean NLL  ID=0.318  OOD=2.169  (ppl 1.37 -> 8.75)
+  top1 by position (deciles):
+     ID : 0.76 0.97 0.87 0.88 0.75 0.74 0.77 0.69 0.91 0.84
+     OOD: 0.48 0.63 0.26 0.48 0.15 0.63 0.71 0.51 0.75 0.77
+
+--- held-out family: IGBT (27 unique steps, 2.5% of targets unseen-vocab) ---
+  next-step ID            : top1=0.745 top3=1.000 top5=1.000 mrr=0.873
+  next-step OOD (fam tok) : top1=0.720 top3=0.975 top5=0.975 mrr=0.847
+  next-step OOD (unk tok) : top1=0.715 top3=0.975 top5=0.975 mrr=0.844
+  -- decomposition (shared-vocab targets only) --
+     ID  top1=0.745   OOD top1=0.738   LOGIC gap=+0.007
+     VOCAB gap (unique targets the OOD model cannot name): 0.025
+  completion ID           : tokAcc=0.410 blkNED=0.028 valid=1.000
+  completion OOD          : tokAcc=0.102 blkNED=0.239 valid=0.812
+  mean NLL  ID=0.314  OOD=2.527  (ppl 1.37 -> 12.51)
+  top1 by position (deciles):
+     ID : 0.80 0.90 0.87 0.85 0.88 0.73 0.74 0.77 0.77 0.85
+     OOD: 0.44 0.53 0.47 0.34 0.36 0.38 0.48 0.54 0.71 0.65
+
+--- held-out family: IC (29 unique steps, 2.0% of targets unseen-vocab) ---
+  next-step ID            : top1=0.635 top3=0.995 top5=1.000 mrr=0.815
+  next-step OOD (fam tok) : top1=0.630 top3=0.955 top5=0.980 mrr=0.798
+  next-step OOD (unk tok) : top1=0.615 top3=0.955 top5=0.980 mrr=0.790
+  -- decomposition (shared-vocab targets only) --
+     ID  top1=0.635   OOD top1=0.643   LOGIC gap=-0.008
+     VOCAB gap (unique targets the OOD model cannot name): 0.020
+  completion ID           : tokAcc=0.282 blkNED=0.052 valid=1.000
+  completion OOD          : tokAcc=0.183 blkNED=0.270 valid=0.975
+  mean NLL  ID=0.377  OOD=2.684  (ppl 1.46 -> 14.65)
+  top1 by position (deciles):
+     ID : 0.65 0.86 0.93 0.92 0.72 0.68 0.75 0.73 0.73 0.73
+     OOD: 0.38 0.18 0.44 0.42 0.30 0.64 0.54 0.63 0.41 0.55
+
+saved full results -> process_lm\runs\lofo_analysis.json
+
+=== HEADLINE: generalization gap (ID - OOD, next-step top1) ===
+  mosfet: ID 0.695 -> OOD 0.590 (drop +0.105) | unk-tok 0.590 | logic-only drop +0.105 | vocab floor 0.000
+  igbt  : ID 0.745 -> OOD 0.720 (drop +0.025) | unk-tok 0.715 | logic-only drop +0.007 | vocab floor 0.025
+  ic    : ID 0.635 -> OOD 0.630 (drop +0.005) | unk-tok 0.615 | logic-only drop -0.008 | vocab floor 0.020
