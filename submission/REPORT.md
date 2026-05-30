@@ -148,11 +148,12 @@ family-dropout is harmless, not helpful).
 Honest takeaways:
 1. **A clean small model already generalizes near its achievable limit from real
    data alone** — correct next-steps and legal routes for families it never saw.
-2. **No augmentation lever robustly improves OOD.** Family-dropout is the most
-   *consistent* (low variance, helps 2 of 3); hybrids are a high-variance gamble.
-3. For the hidden 4th family (direction unknown) the robust bet is **real data +
-   light family-dropout** — it never badly hurts, unlike hybrids which could tank a
-   family the way they tanked IGBT.
+2. **No augmentation lever robustly improves OOD.** Across seeds, family-dropout is
+   *within noise* (harmless, not a real gain); hybrids are a high-variance gamble
+   (big help on MOSFET, big hurt on IGBT).
+3. For the hidden 4th family (direction unknown) the safe default is **plain real
+   data** (a light family-dropout is harmless) — never the hybrids, which could tank
+   a family the way they tanked IGBT.
 
 Had we tested only IC (or only MOSFET) we'd have shipped a confident,
 family-specific, and *wrong* recommendation. Cross-family robustness is the guard.
@@ -169,7 +170,9 @@ bigger model or more data.
 
 ---
 
-## 5. Two traps we caught (the honest part)
+## 5. Two data-augmentation traps we caught (the honest part)
+
+(The third trap — overfitting our own conclusions to one family/seed — is §4.)
 
 **(a) Hybrid pseudo-families are a high-variance gamble, not a fix.** Mixing blocks
 across families ("Frankenstein" routes) was hypothesized to boost generalization.
