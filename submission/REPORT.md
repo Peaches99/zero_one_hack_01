@@ -102,37 +102,60 @@ the two training families' distribution, and that does not transfer. (See
 
 ---
 
-## 4. What actually generalizes (OOD lever study, hold-out IC)
+## 4. What actually generalizes — and the trap of testing one family
 
-Same model, same epochs; only the training-data / regularization strategy varies.
-`vUNK` / `t1UNK` use the `<UNK>` family token — the **true proxy for the hidden 4th
-family**, which has no known family token.
+We first ran the lever study holding out IC, where family-dropout looked like a
+clean winner. **Then we held out MOSFET and IGBT too — and the story inverted.**
+Metrics use the `<UNK>` family token (the true proxy for the hidden 4th family,
+which has no known family token).
 
-| config | valid (UNK) | top-1 | shared-vocab top-1 | t1-UNK | ppl |
-|---|---|---|---|---|---|
-| **real + family-dropout 0.15** | **0.988** | 0.635 | 0.648 | **0.635** | 14.3 |
-| real + family-dropout 0.30 | 0.988 | 0.640 | 0.653 | 0.635 | 14.3 |
-| real | 0.975 | 0.635 | 0.648 | 0.630 | 14.5 |
-| + 8k hybrid pseudo-families | 1.000 | 0.615 | 0.628 | 0.600 | 14.4 |
-| + 8k v2 diversity *(leaky)* | 1.000 | 0.595 | 0.602 | 0.605 | 11.4 |
+OOD next-step **top-1**:
 
-**Finding: the best OOD generalizer is plain real data + a small family-token
-dropout.** Family-dropout gives a small, consistent gain on the unknown-family
-proxy (it stops the model from binding logic to a family identity it won't have at
-test time). Valid-completion is essentially saturated (≈1.0) — the model produces
-*legal* routes for an unseen family almost always; the discriminating metric is
-next-step top-1, capped near the vocabulary ceiling (§6).
+| lever | IC | MOSFET | IGBT | **avg** |
+|---|---|---|---|---|
+| real | 0.630 | 0.645 | 0.685 | **0.653** |
+| real + family-dropout 0.15 | 0.635 | 0.615 | 0.700 | 0.650 |
+| real + family-dropout 0.30 | 0.635 | 0.600 | 0.715 | 0.650 |
+| + 8k hybrids | 0.600 | 0.670 | 0.690 | **0.653** |
+
+OOD **valid-completion**:
+
+| lever | IC | MOSFET | IGBT | **avg** |
+|---|---|---|---|---|
+| real | 0.975 | 0.762 | 0.662 | 0.800 |
+| + family-dropout 0.15 | 0.988 | 0.762 | 0.662 | 0.804 |
+| + 8k hybrids | 1.000 | **0.963** | **0.475** | 0.813 |
+
+**The levers trade off across families and roughly cancel on average (~0.65 top-1,
+~0.80 valid).** Family-dropout helps IC and IGBT but hurts MOSFET; hybrids rescue
+MOSFET (valid 0.76 → 0.96) yet tank IGBT (0.66 → 0.48). MOSFET and IGBT are
+structurally harder to reach from the other two (real valid 0.76 / 0.66) than IC
+(0.98).
+
+Honest takeaways:
+1. **A clean small model already generalizes near its achievable limit from real
+   data alone** — correct next-steps and legal routes for families it never saw.
+2. **No augmentation lever robustly improves OOD.** Family-dropout is the most
+   *consistent* (low variance, helps 2 of 3); hybrids are a high-variance gamble.
+3. For the hidden 4th family (direction unknown) the robust bet is **real data +
+   light family-dropout** — it never badly hurts, unlike hybrids which could tank a
+   family the way they tanked IGBT.
+
+Had we tested only IC (or only MOSFET) we'd have shipped a confident,
+family-specific, and *wrong* recommendation. Cross-family robustness is the guard.
 
 ---
 
 ## 5. Two traps we caught (the honest part)
 
-**(a) Hybrid pseudo-families hurt OOD.** Mixing blocks across families to make
-"Frankenstein" routes was hypothesized to boost generalization. Dose-response says
-otherwise: OOD valid-completion fell 0.963 → 0.900 → 0.850 as we added 0 → 2k → 8k
-hybrids. An earlier "hybrids help" reading came from a *severely undertrained*
-smoke model; properly trained, the clean baseline is already strong and the
-hybrids only add distribution-shift noise.
+**(a) Hybrid pseudo-families are a high-variance gamble, not a fix.** Mixing blocks
+across families ("Frankenstein" routes) was hypothesized to boost generalization.
+On the IC dose-response it monotonically *hurt* (valid-completion 0.963 → 0.900 →
+0.850 for 0 → 2k → 8k hybrids). Across families it's more than "hurts": hybrids
+*help* MOSFET (valid 0.76 → 0.96) but *tank* IGBT (0.66 → 0.48). An early "hybrids
+help" reading came from a severely undertrained smoke model. The lesson isn't
+"hybrids are bad" — it's that any single-family read (smoke, IC-only, MOSFET-only)
+would have given a different, confident, wrong answer.
 
 **(b) Our own v2 diversity generator leaked the answer.** v2 (variable cycle
 counts, mixed blocks — `diversify2.py`) appeared to cut OOD loss 2.66 → 2.42. But
@@ -160,9 +183,17 @@ has never seen and cannot name:
 At the 60/80% evaluation cut points the OOV rate is lower (~2%), so the model's
 0.635 OOD top-1 ≈ its 0.648 shared-vocabulary top-1 — i.e. the limiter there is
 process logic + irreducible coin-flips, not vocabulary. The remaining ID→OOD logic
-gap is small (ID top-1 ≈ 0.74 vs OOD 0.635). Sub-word tokenization is the one lever
-with a genuinely higher ceiling (it could compose ~26–55% of unseen steps from
-known words); we scoped it as future work after confirming the cleaner levers.
+gap is small (ID top-1 ≈ 0.74 vs OOD 0.635) and no lever in §4 closed it.
+
+We tested the obvious vocabulary-gap fix directly — **word-level tokenization**
+(`process_lm/wordlevel.py`): each step becomes its words plus `<ENDSTEP>`, so an
+unseen step can be composed from known words. It **backfired**: OOD top-1 fell to
+**0.41** (from 0.635) and valid-completion to **0.22** (from ~1.0). Fragmenting
+each step into words compounds errors across the ~120 *shared* steps far more than
+it rescues the ~2% genuinely-OOV targets at the cuts, and word-by-word generation
+over ~600-token routes rarely stays rule-valid. **Step-level tokenization is the
+right representation** for a grammar that operates on whole steps — a clean
+negative result that sharpens, rather than weakens, the conclusion.
 
 ---
 
@@ -171,12 +202,17 @@ known words); we scoped it as future work after confirming the cleaner levers.
 Final model: medium (25M), all three families + family-dropout 0.15, bf16. ID
 validation loss **0.3315 ≈ the 0.328 floor** (train 0.327 — almost no gap).
 
-- **Task 1 — Next-step:** strong in-distribution; on the OOD proxy, top-1 0.635
-  (near the vocabulary ceiling), valid-completion ≈1.0.
-- **Task 2 — Completion:** trained model rolls forward into **valid** routes
-  (validator-confirmed), including family-specific detail it must infer from
-  context (IGBT `ALIGN MASK LEVEL 5/6`, IC `DEPOSIT TUNGSTEN SEED → FILL VIA
-  TUNGSTEN`). Baseline produces 150–220-step routes with dozens of violations.
+- **Task 1 — Next-step:** ID **top-1 0.682, top-3 0.997, top-5 1.000, MRR 0.838**
+  — the true step is in the top-3 ~99.7% of the time; top-1 is capped only by the
+  grammar's coin-flips. OOD proxy: top-1 ~0.65 avg (near the vocabulary ceiling).
+- **Task 2 — Completion:** ID completions are **100% process-valid (0%
+  rule-breaking)** with block-level normalized edit distance **0.022** (near-perfect
+  process-logic flow). Exact-match is low (1.3%) *by design* — the grammar's
+  coin-flips make the exact continuation unpredictable (the floor again). The model
+  also generates **60/60 valid routes from scratch** from only `RECEIVE WAFER LOT`,
+  and infers family-specific detail from context (IGBT `ALIGN MASK LEVEL 5/6`, IC
+  `DEPOSIT TUNGSTEN SEED → FILL VIA TUNGSTEN`). The untrained baseline produces
+  150–220-step routes with dozens of violations.
 - **Task 3 — Anomaly detection:** the LM's surprise spike (max per-step NLL)
   separates valid from rule-violating routes **perfectly on our validator-labeled
   eval: ROC-AUC 1.000, F1 1.000**, with a clean margin (valid sequences never
@@ -240,6 +276,10 @@ hits the exact information floor in-distribution, produces valid routes for an
 unseen family, and flags rule violations from its own surprise. We know these are
 real because we measured against the data's true entropy, not against our hopes.
 
-**We won't claim:** that data-augmentation tricks improved generalization. They
-didn't; one of ours leaked the answer until we caught it. The honest lever was
-small (family-dropout). Reporting that, with the trap we avoided, is the result.
+**We won't claim:** that any data-augmentation trick robustly improved
+generalization. None did — effects are family-specific and cancel on average, one
+of ours leaked the answer until we caught it, and a single-family evaluation would
+have produced a confident wrong recommendation. The honest, robust lever is small
+(light family-dropout). Reporting that — with the three traps we avoided
+(memorization-as-progress, vocabulary leakage, and single-family overfitting of our
+own conclusions) — is the result.

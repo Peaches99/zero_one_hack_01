@@ -48,6 +48,14 @@ CONFIG_SETS = {
     "best": [
         ("v2_8k_fd15", ["--add-v2", "8000", "--family-dropout", "0.15"]),
     ],
+    # cross-family robustness: confirm "real + family-dropout" wins regardless of
+    # which family is held out (v2 dropped — leak-guarded v2 is too sparse to test).
+    "robust": [
+        ("real", []),
+        ("real_fd15", ["--family-dropout", "0.15"]),
+        ("real_fd30", ["--family-dropout", "0.30"]),
+        ("hyb8k", ["--add-hybrids", "8000", "--hybrid-tag", "random"]),
+    ],
 }
 
 
