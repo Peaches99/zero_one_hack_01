@@ -62,10 +62,24 @@ def _move_before(steps, mover_pred, target_pred):
 
 _CLEANS = gs.CLEAN_STEPS
 
+
+def _swap_litho_levels(steps):
+    """Swap the first and last ALIGN MASK LEVEL tokens -> out-of-order levels."""
+    idxs = [i for i, s in enumerate(steps) if s.startswith("ALIGN MASK LEVEL ")]
+    if len(idxs) < 2:
+        return None
+    s = list(steps)
+    i, j = idxs[0], idxs[-1]
+    s[i], s[j] = s[j], s[i]
+    return s
+
+
 CORRUPTIONS = {
     "RULE_DEP_NO_CLEAN": lambda s: _drop_one(s, lambda x: x in _CLEANS),
     "RULE_ETCH_NO_MASK": lambda s: _drop_one(s, lambda x: x in ("DEVELOP PHOTORESIST", "DEVELOP PAD WINDOW")),
     "RULE_IMPLANT_NO_MASK": lambda s: _drop_one(s, lambda x: x in ("DEVELOP PHOTORESIST",)),
+    "RULE_METAL_ETCH_NO_LITHO": lambda s: _drop_one(s, lambda x: x.startswith("EXPOSE LITHO LEVEL")),
+    "RULE_LITHO_LEVEL_SKIP": _swap_litho_levels,
     "RULE_SHIP_BEFORE_TEST": lambda s: _move_before(s, lambda x: x == "SHIP LOT",
                                                      lambda x: x == "WAFER SORT TEST"),
     "RULE_TEST_BEFORE_PASSIVATION": lambda s: _move_before(
