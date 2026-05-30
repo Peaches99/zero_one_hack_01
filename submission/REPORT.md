@@ -215,7 +215,9 @@ IC-only). The "win" was vocabulary leakage — perplexity dropped because leaked
 steps became predictable, yet **OOD top-1 actually went down**. We added a
 pool-vocabulary leak guard; leak-free, v2 provides no top-1 gain. This is exactly
 the "don't make a biased set" failure mode, caught by watching the vocab and the
-top-1 (not just the loss).
+top-1 (not just the loss). (And trained into the *full* model — all families, no
+holdout, so leakage is impossible — 30k v2 routes still *raised* ID val loss
+0.331 → 0.342: diverse synthetic volume hurts even in-distribution.)
 
 There's a deeper reason it *had* to leak: the structural diversity that would
 prepare a model for IGBT's six-mask-level routes **is** `ALIGN MASK LEVEL 5/6` —
