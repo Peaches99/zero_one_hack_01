@@ -1,0 +1,28 @@
+==============================================================================
+FAMILY MOSFET   (showing 73/123 steps, predict the next)
+  context tail : ...VIA OPENING INSPECTION | VIA ETCH | STRIP PHOTORESIST | CLEAN AFTER VIA ETCH
+  TRUE next    : MEASURE VIA CD
+  baseline top5: ['DEPOSIT SPACER DIELECTRIC', 'VIA INSPECTION', 'LEAKAGE TEST', 'DENSIFY OXIDE', 'MEASURE OXIDE THICKNESS']   miss
+  trained  top5: ['MEASURE VIA CD', 'DEPOSIT BARRIER METAL', 'DRY WAFER', 'DENSIFY OXIDE', 'DENSIFY DIELECTRIC']   HIT
+  completion (baseline): 220 steps -> INVALID (174 violations)
+  completion (trained) : 51 steps -> VALID route
+  trained completion head: MEASURE VIA CD | DEPOSIT BARRIER METAL | DEPOSIT METAL SEED | FILL VIA METAL | CMP VIA FILL | MEASURE VIA RESISTANCE ...
+==============================================================================
+FAMILY IGBT   (showing 89/149 steps, predict the next)
+  context tail : ...DENSIFY DIELECTRIC | MEASURE FILM THICKNESS | CMP INTERLAYER DIELECTRIC | MEASURE PLANARITY
+  TRUE next    : SPIN COAT PHOTORESIST
+  baseline top5: ['VIA INSPECTION', 'DEPOSIT PASSIVATION', 'MEASURE SURFACE UNIFORMITY', 'ANISOTROPIC ETCH SPACER', 'BACKSIDE METALLIZATION PREP']   miss
+  trained  top5: ['SPIN COAT PHOTORESIST', 'MEASURE POLY THICKNESS', 'MEASURE METAL THICKNESS', 'MEASURE FILM THICKNESS', 'PRE ANNEAL CHECK']   HIT
+  completion (baseline): 219 steps -> INVALID (111 violations)
+  completion (trained) : 59 steps -> VALID route
+  trained completion head: SPIN COAT PHOTORESIST | SOFT BAKE | ALIGN MASK LEVEL 5 | EXPOSE LITHO LEVEL 5 | DEVELOP PHOTORESIST | VIA OPENING INSPECTION ...
+==============================================================================
+FAMILY IC   (showing 66/110 steps, predict the next)
+  context tail : ...EXPOSE LITHO LEVEL 3 | DEVELOP PHOTORESIST | VIA INSPECTION | VIA ETCH THROUGH DIELECTRIC
+  TRUE next    : STRIP PHOTORESIST
+  baseline top5: ['LEAKAGE TEST', 'EXPOSE LITHO LEVEL 2', 'BACKSIDE GRIND', 'VIA INSPECTION', 'SWITCHING TEST']   miss
+  trained  top5: ['STRIP RESIST', 'STRIP PHOTORESIST', 'STRIP RESIST LEVEL 2', 'SPIN COAT PHOTORESIST', 'HARD BAKE']   HIT
+  completion (baseline): 219 steps -> INVALID (7 violations)
+  completion (trained) : 50 steps -> VALID route
+  trained completion head: STRIP RESIST | CLEAN AFTER VIA ETCH | MEASURE VIA CD | DEPOSIT BARRIER METAL | DEPOSIT TUNGSTEN SEED | FILL VIA TUNGSTEN ...
+==============================================================================
