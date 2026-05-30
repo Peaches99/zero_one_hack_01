@@ -182,11 +182,134 @@ def fig_position_accuracy():
     fig.tight_layout(); fig.savefig(FIG / "position_accuracy.png", dpi=130); plt.close(fig)
 
 
+def fig_block_ceiling():
+    """Task-2 completion: model block-acc sits ON the Bayes-optimal ceiling.
+    Measured by process_lm.block_gap (token-conditioned oracle ceiling)."""
+    import numpy as np
+    cuts = ["60% cut", "80% cut", "overall"]
+    model = [0.4651, 0.9284, 0.6968]    # greedy; submitted MBR overall = 0.711
+    ceil = [0.4904, 0.9305, 0.7105]     # token-conditioned Bayes ceiling
+    fig, ax = plt.subplots(figsize=(7, 4.5))
+    x = np.arange(3); w = 0.36
+    ax.bar(x - w / 2, model, w, label="our model", color="tab:blue")
+    ax.bar(x + w / 2, ceil, w, label="Bayes ceiling (oracle)", color="tab:gray")
+    for i, (m, c) in enumerate(zip(model, ceil)):
+        ax.text(i, max(m, c) + 0.02, f"gap {c - m:+.3f}", ha="center", fontsize=8)
+    ax.set_xticks(x); ax.set_xticklabels(cuts); ax.set_ylim(0, 1.05)
+    ax.set_ylabel("Block-level Accuracy")
+    ax.set_title("Task 2: at the ceiling — 80% cut is maxed, 60% is information-limited")
+    ax.legend(fontsize=8); ax.grid(axis="y", alpha=0.3)
+    fig.tight_layout(); fig.savefig(FIG / "block_ceiling.png", dpi=130); plt.close(fig)
+
+
+def fig_id_vs_ood_transfer():
+    """The transferable-understanding result: on an unseen family, block STRUCTURE
+    survives while exact-token prediction collapses (vocabulary ceiling)."""
+    import numpy as np
+    groups = ["Block-level Acc\n(structure)", "Token Acc\n(exact step)"]
+    id_vals = [0.697, 0.418]    # in-distribution (block_gap)
+    ood_vals = [0.501, 0.157]   # held-out family (ood_eval, LOFO)
+    fig, ax = plt.subplots(figsize=(7, 4.5))
+    x = np.arange(2); w = 0.36
+    ax.bar(x - w / 2, id_vals, w, label="in-distribution", color="tab:green")
+    ax.bar(x + w / 2, ood_vals, w, label="OOD (unseen family)", color="tab:orange")
+    for i, (a, b) in enumerate(zip(id_vals, ood_vals)):
+        ax.text(i - w / 2, a + 0.02, f"{a:.2f}", ha="center", fontsize=8)
+        ax.text(i + w / 2, b + 0.02, f"{b:.2f}", ha="center", fontsize=8)
+    ax.set_xticks(x); ax.set_xticklabels(groups); ax.set_ylim(0, 0.85)
+    ax.set_ylabel("accuracy")
+    ax.set_title("Process STRUCTURE transfers to unseen families; exact tokens don't")
+    ax.legend(fontsize=8); ax.grid(axis="y", alpha=0.3)
+    fig.tight_layout(); fig.savefig(FIG / "id_vs_ood_transfer.png", dpi=130); plt.close(fig)
+
+
+def fig_diversity_scaling():
+    """Headline OOD study: at FIXED data volume, does training on more families lift
+    OOD block-acc? Reads process_lm/runs/diversity_results.csv (diversity_ood.py)."""
+    import numpy as np
+    p = RUNS / "diversity_results.csv"
+    if not p.exists():
+        return
+    rows = list(csv.DictReader(open(p, newline="")))
+    if not rows:
+        return
+    fams = [f for f in ("mosfet", "igbt", "ic")
+            if any(r["held_out"] == f for r in rows)]
+    series = {"1 family": [], "2 families": [], "2 fam + family-dropout": []}
+    labels = []
+    for f in fams + ["MEAN"]:
+        sub = rows if f == "MEAN" else [r for r in rows if r["held_out"] == f]
+        one = [float(r["ood_blk"]) for r in sub if r["condition"].startswith("1fam_")]
+        two = [float(r["ood_blk"]) for r in sub if r["condition"] == "2fam"]
+        twofd = [float(r["ood_blk"]) for r in sub if r["condition"] == "2fam_fd15"]
+        if not (one and two):
+            continue
+        labels.append(f.upper())
+        series["1 family"].append(sum(one) / len(one))
+        series["2 families"].append(sum(two) / len(two))
+        series["2 fam + family-dropout"].append(sum(twofd) / len(twofd) if twofd else np.nan)
+    if not labels:
+        return
+    fig, ax = plt.subplots(figsize=(8, 4.5))
+    x = np.arange(len(labels)); w = 0.26
+    for i, (name, vals) in enumerate(series.items()):
+        ax.bar(x + (i - 1) * w, vals, w, label=name)
+    ax.set_xticks(x); ax.set_xticklabels(labels); ax.set_ylim(0, max(0.7, max(
+        v for vs in series.values() for v in vs if v == v) + 0.08))
+    ax.set_ylabel("OOD Block-level Accuracy (held-out family)")
+    ax.set_title("Diversity scaling: more training families -> better OOD (fixed data volume)")
+    ax.legend(fontsize=8); ax.grid(axis="y", alpha=0.3)
+    fig.tight_layout(); fig.savefig(FIG / "diversity_scaling.png", dpi=130); plt.close(fig)
+
+
+def _grok_log(name: str):
+    p = RUNS / "grok" / name / "train_log.csv"
+    if not p.exists():
+        return None
+    ep, tr, vl = [], [], []
+    with open(p) as f:
+        for r in csv.DictReader(f):
+            ep.append(int(r["epoch"])); tr.append(float(r["train_loss"])); vl.append(float(r["val_loss"]))
+    return (ep, tr, vl) if ep else None
+
+
+def fig_grokking():
+    """Delayed generalization on a tiny training set: train memorizes early (loss <<
+    floor) while held-out loss lags, then (if grokking) snaps down toward the floor."""
+    fig, ax = plt.subplots(1, 2, figsize=(13, 4.5))
+    for name, lbl, c in [("d100_wd1.0", "100 seqs", "tab:red"),
+                         ("d300_wd1.0", "300 seqs", "tab:blue"),
+                         ("d800_wd1.0", "800 seqs (control)", "tab:green")]:
+        d = _grok_log(name)
+        if not d:
+            continue
+        ax[0].plot(d[0], d[2], c=c, label=f"{lbl} — held-out")
+    dt = _grok_log("d100_wd1.0")
+    if dt:
+        ax[0].plot(dt[0], dt[1], ls=":", c="gray", lw=1, label="100 seqs — train (memorized)")
+    ax[0].axhline(ID_FLOOR, ls="--", c="k", lw=1, label=f"entropy floor {ID_FLOOR}")
+    ax[0].set_xscale("log"); ax[0].set_xlabel("epoch (log scale)"); ax[0].set_ylabel("loss (nats/token)")
+    ax[0].set_title("Grokking? held-out loss vs training time (wd=1.0)")
+    ax[0].legend(fontsize=8); ax[0].grid(alpha=0.3)
+    for name, lbl in [("d300_wd1.0", "wd=1.0"), ("d300_wd0.1", "wd=0.1")]:
+        d = _grok_log(name)
+        if not d:
+            continue
+        ax[1].plot(d[0], d[2], label=f"{lbl} — held-out")
+    ax[1].axhline(ID_FLOOR, ls="--", c="k", lw=1, label=f"floor {ID_FLOOR}")
+    ax[1].set_xscale("log"); ax[1].set_xlabel("epoch (log scale)")
+    ax[1].set_title("Weight-decay effect on grokking (300 seqs)")
+    ax[1].legend(fontsize=8); ax[1].grid(alpha=0.3)
+    fig.tight_layout(); fig.savefig(FIG / "grokking.png", dpi=130); plt.close(fig)
+
+
 def main() -> None:
     FIG.mkdir(parents=True, exist_ok=True)
     made = []
     for fn in (fig_loss_curves, fig_scaling, fig_hybrid_dose, fig_levers,
-               fig_guided_decoding, fig_floor_split, fig_position_accuracy):
+               fig_guided_decoding, fig_floor_split, fig_position_accuracy,
+               fig_block_ceiling, fig_id_vs_ood_transfer, fig_diversity_scaling,
+               fig_grokking):
         try:
             fn()
             made.append(fn.__name__)

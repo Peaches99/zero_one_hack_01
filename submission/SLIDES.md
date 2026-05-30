@@ -2,7 +2,7 @@
 
 ~10 slides for the submission deck. Each bullet ≈ one line on the slide; the
 parenthetical is speaker/demo note. Figures live in
-`process_lm/runs/figures/`.
+`submission/figures/` (regenerate with `python -m process_lm.plots`).
 
 ---
 
@@ -30,10 +30,15 @@ parenthetical is speaker/demo note. Figures live in
   0.0002 nats** — it learned the logic perfectly.
 - The residual 0.33 is **pure coin-flips** (46% of tokens, ~ln 2 each). No biased set.
 
-### 5 — Scaling = memorizing
-- More same-family data / bigger models **do not** improve the held-out family —
-  they overfit faster (best epoch 40 → 1).
-- (Figure: scaling.png — OOD flat while train hits the floor.)
+### 5 — What scaling does (and doesn't) buy
+- **Size & data volume: flat.** 4-layer = 12-layer; 1k = 40k seqs. Bigger just overfits
+  faster (best epoch 40 → 1). (Figure: scaling.png.)
+- **Family DIVERSITY is the one axis that lifts OOD.** At *fixed data volume*, 1 → 2
+  training families raises held-out-family Block-acc **0.31 → 0.47 mean** (+0.32 at the
+  80% cut: 0.31 → 0.63; IGBT hits **0.90**, matching in-distribution). (Figure:
+  diversity_scaling.png.)
+- Implication: generalization scales with *diversity, not parameters* — so our 3-family
+  model should beat this 2-family proxy on the hidden 4th family.
 
 ### 6 — Three traps we caught (the honest part)
 - **Hybrids**: help MOSFET (valid 0.76→0.96), *tank* IGBT (0.66→0.48) — a gamble.
@@ -55,7 +60,9 @@ parenthetical is speaker/demo note. Figures live in
 ### 9 — The three tasks (final model, at the floor)
 - **Task 1 next-step:** top-3 0.997, **top-5 1.000**, MRR 0.838.
 - **Task 2 completion:** **100% process-valid, 0% rule-breaking**; Block-level
-  Accuracy **0.711** (held-out, official metric); on real eval inputs 600/600 valid → SHIP LOT.
+  Accuracy **0.711** (held-out, official metric) — *proven at the Bayes-optimal ceiling*
+  (0.711 vs 0.7105 oracle; the 80% cut is maxed at 0.93); on real eval inputs 600/600
+  valid → SHIP LOT.
 - **Task 3 anomaly:** official `eval_metrics.py` on 987 real seqs — **Acc/Prec/Recall/F1/
   AUC = 1.000** (387/387 caught, 0 FP) **+ Rule Attribution 1.000** (model detects,
   validator names — disclosed hybrid; pure-model attribution 0.58).

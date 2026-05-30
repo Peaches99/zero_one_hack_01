@@ -61,6 +61,11 @@ def main():
     p.add_argument("--epochs", type=int, default=15)
     p.add_argument("--batch-size", type=int, default=64)
     p.add_argument("--lr", type=float, default=3e-4)
+    p.add_argument("--weight-decay", type=float, default=0.1,
+                   help="AdamW weight decay; grokking is sensitive to this (try 1.0)")
+    p.add_argument("--save-every", type=int, default=1,
+                   help="checkpoint cadence (epochs); large values avoid I/O dominating "
+                        "very long runs. Logging stays per-epoch; best.pt still tracks best.")
     p.add_argument("--n-layer", type=int, default=6)
     p.add_argument("--n-head", type=int, default=8)
     p.add_argument("--n-embd", type=int, default=256)
@@ -71,6 +76,10 @@ def main():
     p.add_argument("--val-per-family", type=int, default=100)
     p.add_argument("--hold-out-family", default=None, choices=["mosfet", "igbt", "ic"],
                    help="leave-one-family-out: train on the other two, validate on this (OOD)")
+    p.add_argument("--train-families", default=None,
+                   help="comma-separated subset of families to TRAIN on (diversity axis; "
+                        "compose with --hold-out-family + --train-limit to vary #families "
+                        "at a fixed data volume)")
     p.add_argument("--add-hybrids", type=int, default=0,
                    help="add N validated hybrid pseudo-family routes to training (OOD robustness)")
     p.add_argument("--hybrid-tag", default="hybrid",
@@ -104,12 +113,20 @@ def main():
     else:
         train_recs, val_recs = split_records(records, args.val_per_family, args.seed)
 
+    # Diversity axis: restrict TRAIN to a subset of families (val/OOD unaffected).
+    train_fams = ({f.strip().lower() for f in args.train_families.split(",")}
+                  if args.train_families else None)
+    if train_fams:
+        train_recs = [r for r in train_recs if r[0] in train_fams]
+        print(f"train-families: restricted to {sorted(train_fams)} -> {len(train_recs)} real seqs")
+
     # Scale real data UP: generate extra validated per-family sequences from the
     # organizers' grammar (combinatoric space is billions+, so these are fresh).
     if args.extra_per_family > 0:
         from .diversify import _DATA_DIR  # noqa: F401  (ensures generator import path)
         from generate_sequences import generate_dataset  # type: ignore
-        pool_fams = [f for f in ("mosfet", "igbt", "ic") if f != args.hold_out_family]
+        pool_fams = [f for f in ("mosfet", "igbt", "ic")
+                     if f != args.hold_out_family and (train_fams is None or f in train_fams)]
         extra = []
         for fam in pool_fams:
             for s in generate_dataset(fam, args.extra_per_family, seed=args.seed + hash(fam) % 1000):
@@ -175,7 +192,7 @@ def main():
     )
     model = GPT(cfg).to(device)
     print(f"params={sum(p.numel() for p in model.parameters()) / 1e6:.2f}M")
-    opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=0.1, betas=(0.9, 0.95))
+    opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay, betas=(0.9, 0.95))
 
     log_path = out / "train_log.csv"
     log_path.write_text("epoch,train_loss,val_loss,seconds\n")
@@ -202,11 +219,14 @@ def main():
         with open(log_path, "a") as f:
             f.write(f"{epoch},{train_loss:.6f},{val_loss:.6f},{dt:.1f}\n")
 
-        ckpt = {"model": model.state_dict(), "config": vars(cfg), "args": vars(args)}
-        torch.save(ckpt, out / "last.pt")
-        if val_loss < best_val:
-            best_val = val_loss
-            torch.save(ckpt, out / "best.pt")
+        improved = val_loss < best_val
+        if improved or epoch % args.save_every == 0 or epoch == args.epochs:
+            ckpt = {"model": model.state_dict(), "config": vars(cfg), "args": vars(args)}
+            if epoch % args.save_every == 0 or epoch == args.epochs:
+                torch.save(ckpt, out / "last.pt")
+            if improved:
+                best_val = val_loss
+                torch.save(ckpt, out / "best.pt")
 
     print(f"done. best val loss {best_val:.4f}. checkpoints + log in {out}")
 
