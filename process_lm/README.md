@@ -57,8 +57,16 @@ Artifacts land in `process_lm/runs/v1/`: `best.pt`, `last.pt`, `tokenizer.json`,
 | `data.py` | BOM-safe CSV loader, dataset, right-pad collate, train/val split |
 | `model.py` | nanoGPT-style decoder (`GPT`, `GPTConfig`) |
 | `metrics.py` | Task 1 & 2 metrics, reimplemented from the eval spec |
-| `train.py` | training loop, checkpoints, loss log |
+| `train.py` | training loop (bf16 AMP), checkpoints, loss log; `--add-hybrids/--add-v2/--family-dropout` |
 | `predict.py` | next-step / completion / sanity / demo readouts |
+| `oracle.py` | **exact entropy floor** — instruments the real generator (byte-identical selftest) + falsification check |
+| `diversify.py` / `diversify2.py` | hybrid pseudo-families / v2 variable-cycle generator (leak-guarded) |
+| `overnight.py` / `ood_compare.py` | scaling + hybrid-dose grid / leak-guarded OOD lever study |
+| `lofo_analysis.py` | leave-one-family-out ID→OOD gap decomposition (logic vs vocab, by position) |
+| `anomaly.py` | Task 3 — LM-surprise anomaly detector + validator-labeled eval |
+| `guided.py` | validity-guided decoding + grammar repair (100% valid OOD completions) |
+| `wordlevel.py` | word-level tokenization experiment (a clean negative result) |
+| `submit.py` / `demo.py` / `plots.py` | 3 submission files / before-after demo / figures |
 
 ## Notes
 
