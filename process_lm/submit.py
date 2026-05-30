@@ -21,7 +21,7 @@ import random
 import sys
 from pathlib import Path
 
-from .anomaly import anomaly_score
+from .anomaly import anomaly_score, attribute_rule
 from .data import build_records, load_all_families, split_records
 from .predict import complete, get_device, load_model, predict_next
 from .tokenizer import Tokenizer
@@ -122,10 +122,11 @@ def write_anomaly(model, tok, anomaly_rows, device, out, thr, mode="model"):
                 score = 1.0 if is_valid else 0.0
                 rule = "" if is_valid else viol[0].rule
             else:
-                sc, _pos = anomaly_score(model, tok, fam, steps, device)
+                sc, pos = anomaly_score(model, tok, fam, steps, device)
                 is_valid = 1 if sc < thr else 0
                 score = 1.0 / (1.0 + math.exp(sc - thr))  # P(valid): high when surprise low
-                rule = ""  # rule attribution left blank for the honest LM detector
+                # Model localizes the surprise; attribute_rule names the implicated rule.
+                rule = "" if is_valid else attribute_rule(steps, pos)
             w.writerow([eid, is_valid, f"{score:.4f}", rule])
 
 

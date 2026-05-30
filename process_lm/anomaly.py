@@ -87,6 +87,9 @@ CORRUPTIONS = {
     "RULE_BACKSIDE_BEFORE_PASSIVATION": lambda s: _move_before(
         s, lambda x: x == "DEPOSIT BACKSIDE METAL", lambda x: x == "CURE PASSIVATION"),
     "RULE_CMP_NO_DEP": lambda s: _drop_one(s, lambda x: x in gs.DEPOSITION_STEPS),
+    "RULE_PAD_OPEN_BEFORE_DEP": lambda s: _move_before(
+        s, lambda x: x in gs.PAD_WINDOW_STEPS,
+        lambda x: x in ("DEPOSIT PASSIVATION", "DEPOSIT PASSIVATION LAYER")),
 }
 
 
@@ -152,6 +155,52 @@ def anomaly_score(model, tok, family, steps, device):
     return mx, nll.index(mx)
 
 
+# --------------------------------------------------------------------------- #
+# Rule attribution                                                            #
+# Detection above is pure LM surprise (no rule engine). Attribution names the #
+# rule a violation at the model's surprise spike would break — a transparent  #
+# map from the spiking step (where the model localized the anomaly) to its    #
+# rule. The model picks WHERE; this names WHAT. The validator is not run.      #
+# --------------------------------------------------------------------------- #
+
+def attribute_rule(steps, spike_pos):
+    """Return the rule ID implicated at the LM's surprise spike (or "")."""
+    n = len(steps)
+    if n == 0 or spike_pos < 0:
+        return ""
+    # The spike may land on the offending step or an immediate neighbour.
+    for i in [spike_pos, *(spike_pos + d for d in (1, -1, 2, -2))]:
+        if not 0 <= i < n:
+            continue
+        s = steps[i]
+        if s in gs.METAL_ETCH_STEPS:  # metal etch: distinguish the two metal rules
+            w = steps[max(0, i - 15):i]
+            if not any(x.startswith("EXPOSE LITHO LEVEL") for x in w):
+                return "RULE_METAL_ETCH_NO_LITHO"
+            if "DEVELOP PHOTORESIST" not in w and "DEVELOP PAD WINDOW" not in w:
+                return "RULE_ETCH_NO_MASK"
+            return "RULE_METAL_ETCH_NO_LITHO"
+        if s in gs.PAD_WINDOW_STEPS:
+            return "RULE_PAD_OPEN_BEFORE_DEP"
+        if s in gs.BACKSIDE_METAL_STEPS:  # before DEPOSITION_STEPS (it is one too)
+            return "RULE_BACKSIDE_BEFORE_PASSIVATION"
+        if s in gs.ETCH_STEPS:
+            return "RULE_ETCH_NO_MASK"
+        if s in gs.IMPLANT_STEPS:
+            return "RULE_IMPLANT_NO_MASK"
+        if s in gs.CMP_STEPS:
+            return "RULE_CMP_NO_DEP"
+        if s in gs.ELECTRICAL_TEST_STEPS:
+            return "RULE_TEST_BEFORE_PASSIVATION"
+        if s == "SHIP LOT":
+            return "RULE_SHIP_BEFORE_TEST"
+        if s.startswith("ALIGN MASK LEVEL "):
+            return "RULE_LITHO_LEVEL_SKIP"
+        if s in gs.DEPOSITION_STEPS:
+            return "RULE_DEP_NO_CLEAN"
+    return ""
+
+
 def _auc(scores, labels_invalid):
     """ROC-AUC for 'higher score => more likely invalid'."""
     pos = [s for s, y in zip(scores, labels_invalid) if y == 1]  # invalid
@@ -163,18 +212,16 @@ def _auc(scores, labels_invalid):
 
 
 def evaluate(model, tok, examples, device):
-    scores, invalid = [], []
-    spike_pos = []
-    for fam, steps, is_valid, _rule in examples:
+    rows = []  # (score, invalid, spike_pos, true_rule, steps)
+    for fam, steps, is_valid, rule in examples:
         sc, pos = anomaly_score(model, tok, fam, steps, device)
-        scores.append(sc)
-        invalid.append(0 if is_valid else 1)
-        spike_pos.append(pos)
+        rows.append((sc, 0 if is_valid else 1, pos, rule, steps))
+    scores = [r[0] for r in rows]
+    invalid = [r[1] for r in rows]
     auc = _auc(scores, invalid)
-    # best-F1 threshold sweep
-    order = sorted(set(scores))
+    # best achievable F1 over all thresholds (oracle threshold; AUC is threshold-free)
     best = {"f1": -1}
-    for thr in order:
+    for thr in sorted(set(scores)):
         tp = sum(1 for s, y in zip(scores, invalid) if y == 1 and s >= thr)
         fp = sum(1 for s, y in zip(scores, invalid) if y == 0 and s >= thr)
         fn = sum(1 for s, y in zip(scores, invalid) if y == 1 and s < thr)
@@ -185,6 +232,20 @@ def evaluate(model, tok, examples, device):
         if f1 > best["f1"]:
             best = {"f1": f1, "thr": thr, "prec": prec, "rec": rec,
                     "tp": tp, "fp": fp, "fn": fn, "tn": tn}
+    # Rule attribution among detected violations (true positives at the best thr).
+    thr = best["thr"]
+    per_rule: dict[str, list[int]] = {}  # rule -> [correct, total]
+    for sc, inv, pos, rule, steps in rows:
+        if inv == 1 and sc >= thr:
+            pred = attribute_rule(steps, pos)
+            d = per_rule.setdefault(rule, [0, 0])
+            d[1] += 1
+            d[0] += int(pred == rule)
+    attr_total = sum(t for _c, t in per_rule.values())
+    attr_correct = sum(c for c, _t in per_rule.values())
+    best["attr_acc"] = attr_correct / attr_total if attr_total else 0.0
+    best["attr_total"] = attr_total
+    best["per_rule"] = per_rule
     return {"auc": auc, **best}
 
 
@@ -199,18 +260,27 @@ def main() -> None:
     model = load_model(Path(args.ckpt), device)
     tok = Tokenizer.load(Path(args.ckpt).parent / "tokenizer.json")
 
+    from collections import Counter
     examples = build_eval(args.n, args.n)
     n_valid = sum(1 for *_x, v, _r in examples if v == 1)
     n_invalid = len(examples) - n_valid
+    rule_dist = Counter(r for *_x, v, r in examples if v == 0)
     print(f"eval set: {n_valid} valid + {n_invalid} invalid (corrupted, validator-confirmed)")
+    print(f"  rules exercised : {len(rule_dist)}/10")
+    for rule, cnt in sorted(rule_dist.items()):
+        print(f"      {rule:33} x{cnt}")
 
     res = evaluate(model, tok, examples, device)
     print(f"\n=== MODEL anomaly detector (LM surprise spike) ===")
-    print(f"  ROC-AUC          : {res['auc']:.4f}")
-    print(f"  best-F1          : {res['f1']:.4f}  (precision {res['prec']:.3f}, recall {res['rec']:.3f})")
-    print(f"  confusion @thr   : TP={res['tp']} FP={res['fp']} FN={res['fn']} TN={res['tn']}")
-    print(f"  threshold (NLL)  : {res['thr']:.3f}")
-    print(f"\n  ORACLE detector (validate_sequence): AUC=1.000 F1=1.000 (rule engine; upper bound)")
+    print(f"  ROC-AUC              : {res['auc']:.4f}")
+    print(f"  best-F1 (oracle thr) : {res['f1']:.4f}  (precision {res['prec']:.3f}, recall {res['rec']:.3f})")
+    print(f"  confusion @thr       : TP={res['tp']} FP={res['fp']} FN={res['fn']} TN={res['tn']}")
+    print(f"  threshold (NLL)      : {res['thr']:.3f}")
+    print(f"  rule attribution acc : {res['attr_acc']:.4f}  (over {res['attr_total']} detected violations)")
+    for rule, (c, t) in sorted(res["per_rule"].items()):
+        print(f"      {rule:33} {c}/{t}")
+    print(f"\n  ORACLE detector (validate_sequence): AUC=1.000 F1=1.000, attribution=1.000 "
+          f"(rule engine; upper bound + label source)")
 
 
 if __name__ == "__main__":

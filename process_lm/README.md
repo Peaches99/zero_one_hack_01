@@ -5,7 +5,7 @@ autoregressive model serves the Infineon track tasks:
 
 - **Next-step prediction** — rank the next-token distribution (Task 1)
 - **Sequence completion** — roll the model forward to `SHIP LOT` (Task 2)
-- **Anomaly detection** — *(coming next)* watch where the model is surprised (Task 3)
+- **Anomaly detection** — watch where the model is surprised, then attribute the rule (Task 3)
 
 Each fab step string (`"DEPOSIT GATE OXIDE"`) is a single token. Family
 (`MOSFET`/`IGBT`/`IC`) is a conditioning token.
@@ -63,12 +63,12 @@ Artifacts land in `process_lm/runs/v1/`: `best.pt`, `last.pt`, `tokenizer.json`,
 | `diversify.py` / `diversify2.py` | hybrid pseudo-families / v2 variable-cycle generator (leak-guarded) |
 | `overnight.py` / `ood_compare.py` | scaling + hybrid-dose grid / leak-guarded OOD lever study |
 | `lofo_analysis.py` | leave-one-family-out ID→OOD gap decomposition (logic vs vocab, by position) |
-| `anomaly.py` | Task 3 — LM-surprise anomaly detector + validator-labeled eval |
+| `anomaly.py` | Task 3 — LM-surprise detector (exercises all 10 rules) + model-driven rule attribution + validator-labeled eval |
 | `guided.py` | validity-guided decoding + grammar repair (100% valid OOD completions) |
 | `wordlevel.py` | word-level tokenization experiment (a clean negative result) |
-| `blocklevel.py` | process-logic-flow LM — **0.0043 val loss** (the legitimate < 0.01) |
+| `blocklevel.py` | process-logic-flow LM — **0.0043 val loss** (reduced rule-granularity view; our block proxy, not the official Block-level Accuracy) |
 | `sidedata.py` | predict a step / full route **with required side data** (family-specific description + fab params) |
-| `submit.py` / `demo.py` / `plots.py` | 3 submission files / before-after demo / figures |
+| `submit.py` / `demo.py` / `plots.py` | 3 submission files (Task 3 `PREDICTED_RULE` populated) / before-after demo incl. the briefing's canonical example / figures |
 
 ## Notes
 

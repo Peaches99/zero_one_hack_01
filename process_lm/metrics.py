@@ -121,15 +121,32 @@ def block_sequence(steps: list[str]) -> list[str]:
 
 
 def blocklevel_metrics(preds: list[list[str]], truths: list[list[str]]) -> dict:
-    """Block-flow exact match and normalized edit distance (synonym-tolerant)."""
+    """Block-level metrics for Task 2 (synonym- and optional-step-tolerant).
+
+    `block_accuracy` is the organizers' named "Block-level Accuracy": position-wise
+    agreement of the predicted vs. true block flow. `block_exact_match` and
+    `block_norm_edit_distance` complement it. NOTE: the block mapping is our
+    `step_category` proxy (the organizers' `eval_metrics.py` was not shipped in the
+    provided data); swap in their definition the moment it lands.
+    """
     n = len(truths)
     if n == 0:
-        return {"block_exact_match": 0.0, "block_norm_edit_distance": 0.0, "n": 0}
+        return {"block_accuracy": 0.0, "block_exact_match": 0.0,
+                "block_norm_edit_distance": 0.0, "n": 0}
     exact = 0
     ned = 0.0
+    blk_correct = blk_total = 0
     for p, t in zip(preds, truths):
         pb, tb = block_sequence(p), block_sequence(t)
         if pb == tb:
             exact += 1
         ned += edit_distance(pb, tb) / max(len(tb), len(pb), 1)
-    return {"block_exact_match": exact / n, "block_norm_edit_distance": ned / n, "n": n}
+        for a, b in zip(pb, tb):
+            blk_correct += int(a == b)
+        blk_total += len(tb)
+    return {
+        "block_accuracy": blk_correct / max(blk_total, 1),
+        "block_exact_match": exact / n,
+        "block_norm_edit_distance": ned / n,
+        "n": n,
+    }

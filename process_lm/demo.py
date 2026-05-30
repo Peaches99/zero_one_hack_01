@@ -33,6 +33,42 @@ def _fresh_baseline(model, device):
     return base.to(device).eval()
 
 
+# The track briefing spells out an exact demonstrator example ("Example
+# Demonstrator Outputs"): after the fixed 3-step prefix, a trained model should
+# propose a plausible initial measurement, while an untrained baseline proposes
+# something implausible (it cites "ETCH"). We reproduce it verbatim.
+CANONICAL_PREFIX = ["RECEIVE WAFER LOT", "LOT IDENTIFICATION", "INITIAL WAFER INSPECTION"]
+CANONICAL_EXPECTED = {  # the grammar's first measurement per family (spec: MEASURE [INITIAL] THICKNESS)
+    "mosfet": {"MEASURE THICKNESS"},
+    "igbt": {"MEASURE INITIAL THICKNESS"},
+    "ic": {"MEASURE INITIAL GEOMETRY", "MEASURE INITIAL THICKNESS"},
+}
+
+
+def _canonical_demo(model, base, tok, device):
+    """Reproduce the briefing's exact next-step example, baseline vs trained."""
+    print("#" * 78)
+    print("# CANONICAL EXAMPLE (track briefing, 'Example Demonstrator Outputs')")
+    print("#   RECEIVE WAFER LOT -> LOT IDENTIFICATION -> INITIAL WAFER INSPECTION -> ?")
+    print("#   spec: baseline -> implausible (e.g. ETCH); trained -> MEASURE [INITIAL] THICKNESS")
+    print("#" * 78)
+    for fam in ("mosfet", "igbt", "ic"):
+        b5 = predict_next(base, tok, fam, CANONICAL_PREFIX, device)
+        t5 = predict_next(model, tok, fam, CANONICAL_PREFIX, device)
+        top1 = t5[0] if t5 else ""
+        if top1 in CANONICAL_EXPECTED[fam]:
+            verdict = "HIT (matches spec)"
+        elif top1.startswith("MEASURE"):
+            verdict = "plausible measurement"
+        else:
+            verdict = "off-grammar"
+        print(f"\n  [{fam.upper()}]")
+        print(f"    baseline top5: {b5}")
+        print(f"    trained  top5: {t5}")
+        print(f"    -> trained top-1 '{top1}': {verdict}")
+    print("#" * 78 + "\n")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--ckpt", required=True)
@@ -44,6 +80,8 @@ def main() -> None:
     model = load_model(Path(args.ckpt), device)
     tok = Tokenizer.load(Path(args.ckpt).parent / "tokenizer.json")
     base = _fresh_baseline(model, device)
+
+    _canonical_demo(model, base, tok, device)
 
     recs = build_records(load_all_families(_DATA_DIR))
     _, val = split_records(recs, 100, 0)

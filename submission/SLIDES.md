@@ -54,9 +54,10 @@ parenthetical is speaker/demo note. Figures live in
 
 ### 9 — The three tasks (final model, at the floor)
 - **Task 1 next-step:** top-3 0.997, **top-5 1.000**, MRR 0.838.
-- **Task 2 completion:** **100% process-valid, 0% rule-breaking**, block-edit 0.022;
-  60/60 valid routes generated from scratch.
-- **Task 3 anomaly:** LM-surprise detector **AUC 1.000 / F1 1.000, all 10 rules**.
+- **Task 2 completion:** **100% process-valid, 0% rule-breaking**; Block-level
+  Accuracy 0.652, block-edit 0.021; 60/60 valid routes generated from scratch.
+- **Task 3 anomaly:** LM-surprise detector **AUC 1.000 / F1 1.000** (all 10 rules);
+  **rule attribution 0.82** (7/10 rules named; 3 confound an adjacent break — disclosed).
 - (Demo: baseline vs trained, side by side — baseline 161 violations, trained valid.)
 
 ### 10 — What we claim / won't claim
