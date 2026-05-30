@@ -1,0 +1,24 @@
+Generated 1000 fresh sequences (seed 99991); 0 regenerated a training sequence and were skipped -> every test seq is unseen.
+Random cut fraction in [0.5, 0.9] per sequence; decoding = plain (matches submission).
+
+========================================================================
+LOCAL EVAL — 1000 fresh held-out sequences, official metric functions
+========================================================================
+TASK 1  next-step prediction:
+  Top-1 0.7310   Top-3 0.9900   Top-5 1.0000   MRR 0.8613
+TASK 2  sequence completion (vs the known true ending):
+  Block-level Accuracy     0.6606
+  Token Accuracy           0.3807
+  Normalized Edit Distance 0.2259   (lower = better)
+  Exact Match Rate         0.0020
+  Valid completion rate    1.0000   (reaches SHIP LOT 1.0000)
+
+by family (n / Top-1 / Block-acc / Valid):
+  mosfet  n= 334   Top-1 0.716   Block-acc 0.684   Valid 1.000
+  igbt    n= 333   Top-1 0.754   Block-acc 0.616   Valid 1.000
+  ic      n= 333   Top-1 0.724   Block-acc 0.682   Valid 1.000
+========================================================================
+
+Run: python -m process_lm.local_eval --ckpt process_lm/runs/final/best.pt --n 1000
+The organizers hold the real Task-1/Task-2 answer key; this is our honest local
+estimate on fresh sequences drawn from their generator (same grammar, unseen draws).

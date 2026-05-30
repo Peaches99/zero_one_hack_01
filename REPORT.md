@@ -113,7 +113,11 @@ Final model: 25M params, all 3 families + family-dropout, bf16.
   logic itself is learned essentially perfectly** — while 0.01 is genuinely unreachable
   for the raw step stream (which *is* the coin-flips). No biased data; the qualifier
   travels with the number.
-- **Task 1 (next-step, ID):** top-3 0.997, **top-5 1.000**, MRR 0.838.
+- **Task 1 (next-step):** the organizers hold this answer key, so we built a local
+  clone of their eval (`process_lm/local_eval.py`) on **1000 fresh, unseen generator
+  sequences we hold the truth for**, scored with the official metric functions:
+  **Top-1 0.731, Top-3 0.990, top-5 1.000, MRR 0.861**. The right step is essentially
+  always in the top 5; top-1 is capped by the grammar's interchangeable/optional steps.
 - **Task 2 (completion):** on the **real eval inputs, 600/600 completions are valid
   full routes that reach `SHIP LOT`** (validator-confirmed, all three families). Official
   `eval_metrics.py` numbers on held-out data (the eval truth is organizer-held):

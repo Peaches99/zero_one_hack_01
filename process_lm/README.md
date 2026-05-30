@@ -68,6 +68,7 @@ Artifacts land in `process_lm/runs/v1/`: `best.pt`, `last.pt`, `tokenizer.json`,
 | `wordlevel.py` | word-level tokenization experiment (a clean negative result) |
 | `blocklevel.py` | process-logic-flow LM — **0.0043 val loss** (reduced rule-granularity view; our block proxy, not the official Block-level Accuracy) |
 | `sidedata.py` | predict a step / full route **with required side data** (family-specific description + fab params) |
+| `local_eval.py` | local clone of the organizers' eval on 1000 **fresh unseen** sequences, scored with their official metric functions (real Task 1 + Task 2 numbers) |
 | `submit.py` / `demo.py` / `plots.py` | 3 submission files (Task 3 `PREDICTED_RULE` populated) / before-after demo incl. the briefing's canonical example / figures |
 
 ## Notes
