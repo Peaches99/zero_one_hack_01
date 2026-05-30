@@ -137,9 +137,11 @@ scored-metric gain exists on OOD either.**
 
 ## Final verdict
 
-Across **5 decoding strategies, 3 next-step re-rankers, 2 ensembles (confirmation-
-tested), a 19-config train sweep, and an OOD plain-vs-guided test**, no approach
-produces a verifiable improvement on any scored metric (ID or OOD). The model is at the
+Across **6 decoding strategies** (greedy/guided/beam/MBR-token/MBR-block/ensemble; even
+block-consensus MBR + width-12 beam land at +0.002–0.0035 Block-acc = <1 SE noise),
+**3 next-step re-rankers, 2 ensembles (confirmation-tested), a 19-config train sweep, and
+an OOD plain-vs-guided test**, no approach produces a verifiable improvement on any
+scored metric (ID or OOD). The model is at the
 information-theoretic ceiling everywhere it can be — Bayes-optimal in-distribution, and
 fundamentally vocabulary-limited (not fixable) out-of-distribution. The honest, hard-won
 result is **provable optimality**, established by exhaustively trying to beat it.

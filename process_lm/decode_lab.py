@@ -39,6 +39,7 @@ for _p in (_DATA, _PF):
         sys.path.insert(0, str(_p))
 import generate_sequences as gs  # noqa: E402
 from eval_metrics import (  # noqa: E402
+    _block_signature,
     block_level_accuracy,
     normalized_edit_distance,
     token_accuracy,
@@ -103,6 +104,23 @@ def mbr_complete(model, tok, fam, partial, device, k=8, temperature=0.7, max_new
     best_i, best_cost = 0, float("inf")
     for i in range(k):
         cost = sum(normalized_edit_distance(comps[i], comps[j]) for j in range(k) if j != i)
+        if cost < best_cost:
+            best_cost, best_i = cost, i
+    return comps[best_i]
+
+
+@torch.no_grad()
+def mbr_block_complete(model, tok, fam, partial, device, k=8, temperature=0.7, max_new=240):
+    """Like MBR but consensus on BLOCK structure (min mean block-edit-dist) -> block-acc."""
+    ids = tok.encode_sequence(partial, fam, add_bos=True, add_eos=False)
+    x = torch.tensor([ids] * k, dtype=torch.long, device=device)
+    out = model.generate(x, max_new_tokens=max_new, eos_id=tok.eos_id,
+                         temperature=temperature, greedy=False)
+    comps = [_trim(out[r, len(ids):].tolist(), tok) for r in range(k)]
+    sigs = [_block_signature(c) for c in comps]
+    best_i, best_cost = 0, float("inf")
+    for i in range(k):
+        cost = sum(normalized_edit_distance(sigs[i], sigs[j]) for j in range(k) if j != i)
         if cost < best_cost:
             best_cost, best_i = cost, i
     return comps[best_i]
@@ -239,6 +257,8 @@ def main() -> None:
                 pred = beam_complete(model, tok, fam, partial, device, width=args.beam_width)
             elif s == "mbr":
                 pred = mbr_complete(model, tok, fam, partial, device, k=args.mbr_k, temperature=args.mbr_temp)
+            elif s == "mbrblk":
+                pred = mbr_block_complete(model, tok, fam, partial, device, k=args.mbr_k, temperature=args.mbr_temp)
             elif s == "ensemble":
                 pred = ensemble_complete(models2, tok, fam, partial, device)
             else:
