@@ -125,10 +125,46 @@ def fig_levers():
     fig.tight_layout(); fig.savefig(FIG / "levers.png", dpi=130); plt.close(fig)
 
 
+def fig_guided_decoding():
+    """Measured OOD valid-completion: greedy vs validity-guided vs guided+repair."""
+    import numpy as np
+    fams = ["MOSFET", "IGBT", "IC"]
+    greedy = [0.733, 0.617, 0.983]   # measured, hold-out family, runs/ood/*_real
+    guided = [0.817, 1.000, 1.000]
+    repair = [1.000, 1.000, 1.000]
+    fig, ax = plt.subplots(figsize=(7, 4.5))
+    x = np.arange(3); w = 0.26
+    ax.bar(x - w, greedy, w, label="greedy")
+    ax.bar(x, guided, w, label="validity-guided")
+    ax.bar(x + w, repair, w, label="guided + grammar repair")
+    ax.set_xticks(x); ax.set_xticklabels(fams); ax.set_ylim(0, 1.08)
+    ax.set_ylabel("OOD valid-completion rate")
+    ax.set_title("Guided decoding -> 100% valid routes for unseen families")
+    ax.legend(fontsize=8); ax.grid(axis="y", alpha=0.3)
+    fig.tight_layout(); fig.savefig(FIG / "guided_decoding.png", dpi=130); plt.close(fig)
+
+
+def fig_floor_split():
+    """The 0.01 target resolved: model loss on deterministic vs stochastic tokens."""
+    fig, ax = plt.subplots(figsize=(7, 4.5))
+    cats = ["deterministic\n(rule-forced, 54%)", "stochastic\n(coin-flips, 46%)"]
+    vals = [0.0002, 0.7248]  # measured per-token model NLL by position type
+    bars = ax.bar(cats, vals, color=["tab:green", "tab:red"])
+    ax.axhline(0.01, ls="--", c="k", lw=1, label="0.01 target")
+    ax.axhline(ID_FLOOR, ls=":", c="gray", lw=1, label=f"ID floor {ID_FLOOR}")
+    for b, v in zip(bars, vals):
+        ax.text(b.get_x() + b.get_width() / 2, v + 0.02, f"{v:.4f}", ha="center", fontsize=9)
+    ax.set_ylabel("model loss (nats/token)")
+    ax.set_title('"0.01" is reached on the logic; the rest is irreducible entropy')
+    ax.legend(fontsize=8)
+    fig.tight_layout(); fig.savefig(FIG / "floor_split.png", dpi=130); plt.close(fig)
+
+
 def main() -> None:
     FIG.mkdir(parents=True, exist_ok=True)
     made = []
-    for fn in (fig_loss_curves, fig_scaling, fig_hybrid_dose, fig_levers):
+    for fn in (fig_loss_curves, fig_scaling, fig_hybrid_dose, fig_levers,
+               fig_guided_decoding, fig_floor_split):
         try:
             fn()
             made.append(fn.__name__)
