@@ -1,0 +1,162 @@
+FAMILY,STEP,DESCRIPTION,PARAMETERS,SIDE_DATA_SOURCE
+mosfet,MEASURE VIA CD,Measure via critical dimension and verify target opening size.,CD‑SEM ±15 nm,exact
+mosfet,DEPOSIT BARRIER METAL,Deposit barrier layer to prevent metal diffusion and improve adhesion.,PVD Ti 20 nm + TiN 30 nm,exact
+mosfet,DEPOSIT METAL SEED,Deposit thin seed layer for subsequent metal fill.,PVD Cu 100 nm,exact
+mosfet,FILL VIA METAL,"Fill vias with metal, controlling void formation and coverage.",Electroplate; current density 2 mA/cm²,exact
+mosfet,CMP VIA FILL,Polish excess metal and leave filled contacts flush with the surface.,Slurry with H₂O₂; pressure 3 psi,synonym(CMP METAL)
+mosfet,MEASURE CONTACT RESISTANCE,Measure contact resistance to confirm electrical quality of the filled vias.,Kelvin structure <10 Ω,exact
+mosfet,DEPOSIT TOP METAL,Deposit first interconnect metal layer; monitor thickness and uniformity.,PVD Al‑0.5%Cu 600 nm,synonym(DEPOSIT METAL 1)
+mosfet,ANNEAL METAL 1,Anneal metal layer to reduce stress and improve adhesion or grain structure.,400 °C forming gas 30 min,exact
+mosfet,SPIN COAT PHOTORESIST,"Coat photoresist on wafer surface; record spin speed, resist thickness, and coating uniformity.",3000 rpm,exact
+mosfet,SOFT BAKE,Soft bake the resist to remove solvent and stabilize the film for exposure.,95 °C,exact
+mosfet,ALIGN MASK LEVEL 4,Align metal routing mask.,Overlay ±100 nm,exact
+mosfet,EXPOSE LITHO LEVEL 4,Expose resist using the metal routing mask.,120 mJ/cm²,exact
+mosfet,DEVELOP PHOTORESIST,Develop exposed resist to reveal the intended pattern.,TMAH 60 s,exact
+mosfet,METAL PATTERN INSPECTION,"Inspect the metal pattern for opens, shorts, and CD variation.",CD ~500 nm,exact
+mosfet,METAL ETCH,Etch metal according to the defined routing pattern.,"ICP Cl₂ 40 sccm, BCl₃ 20 sccm; 10 mTorr; RF 500 W",exact
+mosfet,STRIP PHOTORESIST,Remove remaining photoresist after etch using wet or plasma strip.,O₂ plasma ash 400 W 5 min,exact
+mosfet,CLEAN AFTER METAL ETCH,Clean residue and particles from the metal surface.,H₂SO₄:H₂O₂,exact
+mosfet,MEASURE LINE WIDTH,Measure metal line width and spacing.,CD‑SEM ±50 nm,exact
+mosfet,DEPOSIT PASSIVATION LAYER,Deposit passivation layer to protect the finished device from contamination and moisture.,"PECVD SiN; SiH₄ 50 sccm, NH₃ 100 sccm; 350 °C; 500 nm",synonym(DEPOSIT PASSIVATION)
+mosfet,CURE PASSIVATION,Cure the passivation film to stabilize its mechanical and chemical properties.,400 °C N₂ 30 min,exact
+mosfet,MEASURE PASSIVATION QUALITY,Check passivation thickness and coverage quality.,Ellipsometry ±5%,synonym(MEASURE PASSIVATION THICKNESS)
+mosfet,OPEN BOND PAD WINDOW,Open bond pad windows to expose contact areas for probing or packaging.,Target 80 µm,synonym(OPEN PAD WINDOW)
+mosfet,OPEN PAD WINDOW LITHO,Apply and pattern resist for pad opening.,Resist 1.5 µm,synonym(PAD WINDOW LITHO)
+mosfet,DEVELOP PAD WINDOW,Develop exposed resist to reveal the intended pattern.,TMAH 60 s,synonym(DEVELOP PHOTORESIST)
+mosfet,PASSIVATION ETCH PAD OPENING,Etch passivation layer at pad sites.,RIE CF₄ 40 sccm + O₂ 5 sccm,exact
+mosfet,STRIP RESIST,Strip resist after poly etch and prepare for subsequent processing.,O₂ plasma,exact
+mosfet,CLEAN PAD OPENING,Clean pad area to ensure low-resistance electrical access.,DI rinse + dilute HCl,exact
+mosfet,MEASURE PAD OPENING,Verify pad opening dimensions and completeness.,Optical metrology,exact
+mosfet,BACKSIDE CLEAN,Clean the wafer backside to remove particles and residues.,DI + megasonic,exact
+mosfet,BACKSIDE GRIND,Thin the wafer backside by grinding to target thickness.,Mechanical grind to 250 µm,exact
+mosfet,MEASURE THICKNESS,Measure starting wafer thickness across center and edge points to confirm incoming spec.,"Capacitive gauge, 725 µm ±10 µm",exact
+mosfet,BACKSIDE ETCH CLEAN,Remove grinding damage and residues from the backside.,Wet etch HNA (HF:HNO₃:CH₃COOH) 2 min,exact
+mosfet,BACKSIDE RINSE,Rinse backside to eliminate particles and etch byproducts.,DI cascade rinse,exact
+mosfet,BACKSIDE DRY,Dry the wafer thoroughly after backside wet processing.,N₂ spin dry,exact
+mosfet,BACKSIDE METALLIZATION PREP,"Prepare backside for metal deposition, including surface activation.",Ar plasma 200 W 60 s,exact
+mosfet,DEPOSIT BACKSIDE METAL,Deposit backside metal to support ohmic contact or thermal performance.,PVD Ti 50 nm / Ni 200 nm / Ag 500 nm,exact
+mosfet,BACKSIDE ANNEAL,Anneal backside metallization to improve adhesion and contact quality.,400 °C N₂ 20 min,exact
+mosfet,MEASURE BACKSIDE CONTACT,Measure backside contact quality and sheet resistance.,Sheet resistance <0.1 Ω/□,exact
+mosfet,FINAL CLEAN,Perform final clean before electrical and visual inspection.,DI rinse + N₂ dry,exact
+mosfet,FINAL THICKNESS MEASURE,Measure final thickness to confirm customer specification.,250 µm ±10 µm,exact
+mosfet,FINAL GEOMETRY CHECK,"Inspect wafer geometry, warp, bow, and edge exclusion.",Warp <40 µm,exact
+mosfet,FINAL CD INSPECTION,Final Cd Inspection (process step),In-line measurement/inspection; spec-limit gating,category(METROLOGY)
+mosfet,FINAL PARTICLE INSPECTION,Perform final particle scan before electrical testing.,<10 particles ≥0.2 µm,exact
+mosfet,PARAMETRIC TEST,Run parametric electrical tests to verify key device characteristics.,25 °C probe station,exact
+mosfet,LEAKAGE TEST,Check leakage current to identify defective devices or process issues.,Ioff <10 nA,exact
+mosfet,THRESHOLD VOLTAGE TEST,Measure threshold voltage distribution across the wafer.,0.4–0.7 V distribution,exact
+mosfet,SWITCHING TEST,Evaluate switching behavior under representative operating conditions.,Prop delay <200 ps,exact
+mosfet,WAFER SORT TEST,Sort wafers based on electrical test results and binning criteria.,ATE probe system,exact
+mosfet,YIELD ANALYSIS,"Analyze yield, defect trends, and any systematic deviations.",Target yield >90%,exact
+mosfet,FINAL LOT RELEASE,Release the lot after successful processing and test completion.,MES signoff,synonym(LOT RELEASE)
+mosfet,SHIP LOT,Prepare and ship the final lot to the next manufacturing stage or customer.,Vacuum sealed wafer cassette,exact
+igbt,SPIN COAT PHOTORESIST,"Coat photoresist; track spin speed, thickness, and coating quality.",3000 rpm,exact
+igbt,SOFT BAKE,Stabilize the resist film before exposure.,95 °C,exact
+igbt,ALIGN MASK LEVEL 5,Align final metal mask.,±150 nm,exact
+igbt,EXPOSE LITHO LEVEL 5,Expose resist for terminal or routing pattern.,140 mJ/cm²,exact
+igbt,DEVELOP PHOTORESIST,Develop exposed resist to define the first pattern.,TMAH,exact
+igbt,VIA OPENING INSPECTION,Inspect the via pattern for alignment and CD accuracy.,SEM via CD ~0.8 µm,synonym(VIA INSPECTION)
+igbt,VIA ETCH THROUGH DIELECTRIC,Etch through dielectric to open contacts.,ICP C₄F₈/Ar plasma,exact
+igbt,STRIP PHOTORESIST,Remove resist after etch.,O₂ plasma,exact
+igbt,CLEAN AFTER VIA ETCH,Clean residues and prepare for metallization.,HF dip 30 s,exact
+igbt,MEASURE VIA CD,Measure via critical dimension and opening quality.,SEM ±0.05 µm,exact
+igbt,DEPOSIT BARRIER METAL,Deposit barrier layer to prevent diffusion and improve adhesion.,PVD Ti 30 nm / TiN 40 nm,exact
+igbt,DEPOSIT METAL SEED,Deposit seed layer for subsequent metal fill.,PVD AlCu 100 nm,exact
+igbt,FILL VIA METAL,Fill vias with metal while controlling void formation.,AlCu sputter 1 µm,exact
+igbt,CMP METAL,Polish excess metal and leave planar contacts.,Pressure 3 psi,exact
+igbt,MEASURE CONTACT RESISTANCE,Measure contact resistance to confirm metallization quality.,Kelvin <5 Ω,exact
+igbt,DEPOSIT METAL 1,Deposit top metal layer for interconnect or terminal formation.,PVD Al‑1%Si‑0.5%Cu 3 µm,synonym(DEPOSIT TOP METAL)
+igbt,ANNEAL METAL 1,Anneal metal to improve grain structure and adhesion.,400 °C forming gas 30 min,synonym(ANNEAL METAL)
+igbt,SPIN COAT PHOTORESIST,"Coat photoresist; track spin speed, thickness, and coating quality.",3000 rpm,exact
+igbt,SOFT BAKE,Stabilize the resist film before exposure.,95 °C,exact
+igbt,ALIGN MASK LEVEL 6,Align final metal mask.,±150 nm,level(ALIGN MASK LEVEL 5)
+igbt,EXPOSE LITHO LEVEL 6,Expose resist for terminal or routing pattern.,140 mJ/cm²,level(EXPOSE LITHO LEVEL 5)
+igbt,DEVELOP PHOTORESIST,Develop exposed resist to define the first pattern.,TMAH,exact
+igbt,METAL PATTERN INSPECTION,"Inspect final metal pattern for opens, shorts, and CD variation.",Optical + SEM,exact
+igbt,METAL ETCH DRY,Etch metal according to the designed layout.,ICP Cl₂/BCl₃ plasma,exact
+igbt,STRIP RESIST,Remove photoresist after etch.,O₂ plasma,exact
+igbt,CLEAN AFTER METAL ETCH,Clean residues and particles from the metal surface.,Wet clean H₂SO₄/H₂O₂,exact
+igbt,MEASURE LINE WIDTH,Measure line width and spacing after etch.,SEM ~5 µm,exact
+igbt,DEPOSIT PASSIVATION LAYER,Deposit passivation to protect the device from moisture and contamination.,PECVD SiN 1 µm,synonym(DEPOSIT PASSIVATION)
+igbt,CURE PASSIVATION,Cure the passivation layer to stabilize its properties.,400 °C N₂ 30 min,exact
+igbt,MEASURE PASSIVATION THICKNESS,"Check thickness, coverage, and defect density of the passivation.",Ellipsometry + defect scan,synonym(MEASURE PASSIVATION QUALITY)
+igbt,OPEN BOND PAD WINDOW,Open bond pad windows for probing and packaging.,Target 100 µm,synonym(OPEN PAD WINDOW)
+igbt,OPEN PAD WINDOW LITHO,Pattern resist for pad openings.,Resist 2 µm,synonym(PAD WINDOW LITHO)
+igbt,DEVELOP PAD WINDOW,Develop exposed resist to define the first pattern.,TMAH,synonym(DEVELOP PHOTORESIST)
+igbt,PASSIVATION ETCH PAD OPENING,Etch the passivation at pad sites.,RIE CF₄/O₂,exact
+igbt,STRIP RESIST,Remove photoresist after etch.,O₂ plasma,exact
+igbt,CLEAN PAD OPENING,Clean the pad area for electrical access.,DI rinse,exact
+igbt,MEASURE PAD OPENING,Verify pad opening dimensions and completeness.,Optical metrology,exact
+igbt,BACKSIDE GRIND,Thin the wafer backside to target thickness.,Grind to 200–250 µm,exact
+igbt,MEASURE WAFER THICKNESS,Measure incoming wafer thickness at center and edge points.,725 µm ±10 µm,synonym(MEASURE THICKNESS)
+igbt,BACKSIDE ETCH CLEAN,Remove grinding damage and backside residues.,Wet etch HNA,exact
+igbt,BACKSIDE RINSE,Rinse the backside to remove particles and etch byproducts.,Cascade rinse,exact
+igbt,BACKSIDE DRY,Dry the wafer thoroughly after backside wet processing.,N₂ spin dry,exact
+igbt,BACKSIDE METALLIZATION PREP,Prepare backside for metal deposition and contact formation.,Ar plasma 200 W,exact
+igbt,DEPOSIT BACKSIDE METAL,Deposit backside metal for ohmic contact and thermal performance.,Ti 100 nm / Ni 500 nm / Ag 2 µm,exact
+igbt,BACKSIDE ANNEAL,Anneal backside metallization to improve adhesion and contact quality.,420 °C N₂ 30 min,exact
+igbt,MEASURE BACKSIDE CONTACT,Measure backside contact resistance and uniformity.,Sheet resistance <0.05 Ω/□,exact
+igbt,FINAL CLEAN,Perform final clean before electrical and visual inspection.,DI + N₂ dry,exact
+igbt,FINAL THICKNESS MEASURE,Verify final wafer thickness and mechanical state.,220 µm ±10 µm,exact
+igbt,FINAL GEOMETRY CHECK,"Check bow, warp, and edge exclusion.",Warp <50 µm,exact
+igbt,FINAL CD INSPECTION,Final Cd Inspection (process step),In-line measurement/inspection; spec-limit gating,category(METROLOGY)
+igbt,FINAL PARTICLE INSPECTION,Perform final particle scan prior to test.,<10 ≥0.2 µm,exact
+igbt,PARAMETRIC TEST,Run device-level electrical tests on the completed wafer.,25 °C wafer probe,synonym(ELECTRICAL PARAMETRIC TEST)
+igbt,LEAKAGE TEST,Measure leakage current and identify failing devices.,I_CES <1 µA,exact
+igbt,BREAKDOWN VOLTAGE TEST,Test breakdown voltage to verify power robustness.,V_BR 600–1200 V depending device,exact
+igbt,SWITCHING TEST,Evaluate switching behavior under representative conditions.,Turn‑off time <1 µs,exact
+igbt,YIELD ANALYSIS,Analyze,Target >90%,exact
+igbt,WAFER SORT TEST,Sort wafers into bins according to test results.,Automated test equipment,exact
+igbt,FINAL LOT RELEASE,,QA signoff,synonym(LOT RELEASE)
+igbt,SHIP LOT,,Vacuum sealed cassette,exact
+ic,STRIP RESIST,Remove resist after poly etch.,O₂ plasma,exact
+ic,CLEAN AFTER VIA ETCH,Clean residues and prepare the surface for metallization.,"HF 100:1, 20 s",exact
+ic,MEASURE VIA CD,Measure via critical dimension and verify target size.,CD‑SEM ±15 nm,exact
+ic,DEPOSIT BARRIER METAL,Deposit barrier layer to improve adhesion and prevent diffusion.,PVD Ti 20 nm + TiN 30 nm; pressure 3 mTorr,exact
+ic,DEPOSIT TUNGSTEN SEED,Deposit Tungsten Seed (process step),CVD/PVD deposition; thickness + rate per target,category(DEPOSIT)
+ic,FILL VIA TUNGSTEN,Fill Via Tungsten (process step),Barrier + seed + fill; CMP planarization,category(VIA_FILL)
+ic,CMP VIA FILL,Polish excess metal and leave filled contacts flush with the surface.,Slurry with H₂O₂; platen 70 rpm; 3 psi,synonym(CMP METAL)
+ic,MEASURE VIA RESISTANCE,Measure contact resistance to assess metallization quality.,Kelvin structures; <10 Ω,synonym(MEASURE CONTACT RESISTANCE)
+ic,DEPOSIT METAL 1,Deposit first interconnect metal layer.,PVD Al‑0.5%Cu; thickness 600 nm,exact
+ic,ANNEAL METAL 1,Anneal metal layer to improve stability and reduce stress.,"400 °C forming gas (95% N₂ / 5% H₂), 30 min",exact
+ic,SPIN COAT PHOTORESIST,"Apply photoresist; track spin speed, resist thickness, and coating quality.",TEL track; spin 3000 rpm 30 s; resist thickness ~1.2 µm,exact
+ic,SOFT BAKE,Soft bake resist before exposure.,95 °C,exact
+ic,ALIGN MASK LEVEL 4,Align metal routing mask.,Overlay ±100 nm,exact
+ic,EXPOSE LITHO LEVEL 4,Expose the first metal routing pattern.,120 mJ/cm²,exact
+ic,DEVELOP PHOTORESIST,Develop the exposed resist to reveal the intended feature pattern.,TMAH 60 s,exact
+ic,METAL PATTERN INSPECTION,"Inspect metal lines for opens, shorts, and CD variation.",CD ~500 nm,exact
+ic,METAL ETCH DRY,Etch metal according to the designed layout.,ICP Cl₂/BCl₃ plasma,cross-family(igbt)
+ic,STRIP RESIST,Remove resist after poly etch.,O₂ plasma,exact
+ic,CLEAN AFTER METAL ETCH,Clean residue and particles after etching.,Wet clean H₂SO₄/H₂O₂,exact
+ic,MEASURE LINE WIDTH,Measure line width and spacing.,CD‑SEM 500 nm ±50 nm,exact
+ic,DEPOSIT PASSIVATION LAYER,Deposit passivation layer to protect the device from moisture and contamination.,"PECVD SiN; SiH₄ 50 sccm, NH₃ 100 sccm; 350 °C; thickness 500 nm",synonym(DEPOSIT PASSIVATION)
+ic,CURE PASSIVATION,Cure the passivation film to stabilize its properties.,400 °C N₂ anneal 30 min,exact
+ic,MEASURE PASSIVATION QUALITY,Measure passivation thickness and coverage quality.,Ellipsometry ±5%,synonym(MEASURE PASSIVATION THICKNESS)
+ic,OPEN BOND PAD WINDOW,Open bond pad windows for probing and packaging.,Target 80 µm,synonym(OPEN PAD WINDOW)
+ic,OPEN PAD WINDOW LITHO,Pattern resist for pad opening.,Resist thickness 1.5 µm,synonym(PAD WINDOW LITHO)
+ic,DEVELOP PAD WINDOW,Develop the exposed resist to reveal the intended feature pattern.,TMAH 60 s,synonym(DEVELOP PHOTORESIST)
+ic,PASSIVATION ETCH PAD OPENING,Etch the passivation layer at pad sites.,RIE CF₄ 40 sccm + O₂ 5 sccm,exact
+ic,STRIP RESIST,Remove resist after poly etch.,O₂ plasma,exact
+ic,CLEAN PAD OPENING,Clean pad area to ensure low-resistance electrical access.,DI + dilute HCl,exact
+ic,MEASURE PAD OPENING,Verify pad opening dimensions and completeness.,Optical metrology 80 µm ±3 µm,exact
+ic,BACKSIDE THINNING CHECK,Backside Thinning Check (process step),In-line measurement/inspection; spec-limit gating,category(METROLOGY)
+ic,BACKSIDE CLEAN FINAL,Clean the wafer backside to remove particles and residues.,DI + megasonic,cross-family(mosfet)
+ic,DEPOSIT BACKSIDE PROTECTION,Deposit Backside Protection (process step),CVD/PVD deposition; thickness + rate per target,category(DEPOSIT)
+ic,BACKSIDE ANNEAL,Anneal backside metallization to improve adhesion and contact quality.,400 °C N₂ 20 min,cross-family(mosfet)
+ic,FRONTSIDE CLEAN FINAL,Frontside Clean Final (process step),Wet/clean per fab standard; DI rinse + dry,category(CLEAN)
+ic,FINAL CLEAN,Perform final clean before inspection and test.,DI rinse + N₂ spin dry,exact
+ic,FINAL THICKNESS MEASURE,Measure final wafer thickness and mechanical state.,725 µm ±10 µm,exact
+ic,FINAL GEOMETRY CHECK,"Check bow, warp, and edge exclusion.",Warp <40 µm,exact
+ic,FINAL OXIDE CHECK,Final Oxide Check (process step),In-line measurement/inspection; spec-limit gating,category(METROLOGY)
+ic,FINAL CD INSPECTION,Final Cd Inspection (process step),In-line measurement/inspection; spec-limit gating,category(METROLOGY)
+ic,FINAL PARTICLE INSPECTION,Perform final particle scan before electrical testing.,≥0.2 µm threshold,exact
+ic,FINAL ELECTRICAL TEST PREP,Final Electrical Test Prep (process step),In-line measurement/inspection; spec-limit gating,category(METROLOGY)
+ic,ELECTRICAL PARAMETRIC TEST,Run electrical parametric tests on the completed wafer.,"Probe station, 25 °C",synonym(PARAMETRIC TEST)
+ic,LEAKAGE TEST,Check leakage current and isolate failing devices.,Ioff <10 nA,exact
+ic,THRESHOLD VOLTAGE TEST,Measure threshold voltage distribution across devices.,Target 0.5–0.7 V,exact
+ic,SWITCHING TEST,Evaluate switching behavior and key device dynamics.,Prop delay <200 ps,exact
+ic,WAFER SORT TEST,Sort wafers into bins according to electrical results.,Automatic test equipment,exact
+ic,YIELD ANALYSIS,"Analyze yield, defects, and any systematic process drift.",Target yield >90%,exact
+ic,FINAL LOT RELEASE,Release the lot after passing inspection and test criteria.,MES approval,synonym(LOT RELEASE)
+ic,PACKAGE PREPARATION,Package Preparation (process step),Lot handling/logistics; MES tracked,category(LOGISTICS)
+ic,SHIP LOT,Prepare and ship the lot to downstream packaging or customer.,Vacuum-sealed cassette,exact

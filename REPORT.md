@@ -108,6 +108,14 @@ Final model: 25M params, all 3 families + family-dropout, bf16.
   top-5 stays 0.975–1.000** — the right step is in the top 5 even for a family the
   model never trained on. Valid-completion with guided+repair: **1.000 for all three
   held-out families** (MOSFET 0.73→1.00, IGBT 0.62→1.00, IC 0.98→1.00).
+- **Process parameters (stretch goal):** `process_lm/sidedata.py` predicts a step —
+  or a full guided+repair route — **with its required side data**: the
+  *family-specific* description and realistic fab-level parameters (MOSFET `FILL VIA
+  METAL → Electroplate 2 mA/cm²` vs IGBT `AlCu sputter`). A synonym / level /
+  cross-family / category fallback chain gives **every** step sensible parameters
+  (~80–90% exact-or-synonym; the rest a category default), including steps unique to
+  the unseen family. The model owns the sequential logic; the lookup supplies the
+  fab detail.
 - **Baseline comparison:** an untrained model with the same architecture produces
   150–220-step routes with dozens of rule violations and misses every next-step;
   see `python -m process_lm.demo`. Scaling baselines (data 200→20k, models 0.5M→85M)

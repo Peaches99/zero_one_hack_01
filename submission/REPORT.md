@@ -359,6 +359,7 @@ python -m process_lm.train --n-layer 8 --n-embd 512 --n-head 8 \
 python -m process_lm.anomaly --ckpt process_lm/runs/final/best.pt          # Task 3
 python -m process_lm.submit  --ckpt process_lm/runs/final/best.pt --selfmake --guided   # 3 task files
 python -m process_lm.demo    --ckpt process_lm/runs/final/best.pt          # before/after
+python -m process_lm.sidedata --ckpt process_lm/runs/final/best.pt --family mosfet # step + route WITH side data
 python -m process_lm.guided  --ckpt process_lm/runs/ood/igbt_real/best.pt --family igbt # guided+repair OOD
 python -m process_lm.wordlevel --hold-out ic                              # word-level negative result
 python -m process_lm.blocklevel --process-flow                           # process-logic loss (0.0043 < 0.01)

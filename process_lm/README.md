@@ -67,6 +67,7 @@ Artifacts land in `process_lm/runs/v1/`: `best.pt`, `last.pt`, `tokenizer.json`,
 | `guided.py` | validity-guided decoding + grammar repair (100% valid OOD completions) |
 | `wordlevel.py` | word-level tokenization experiment (a clean negative result) |
 | `blocklevel.py` | process-logic-flow LM — **0.0043 val loss** (the legitimate < 0.01) |
+| `sidedata.py` | predict a step / full route **with required side data** (family-specific description + fab params) |
 | `submit.py` / `demo.py` / `plots.py` | 3 submission files / before-after demo / figures |
 
 ## Notes
