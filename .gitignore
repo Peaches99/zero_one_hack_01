@@ -13,5 +13,8 @@ runs/
 *.pt
 *.ckpt
 
+# Generated synthetic corpora (large; reproducible via process_lm.diversify2)
+process_lm/data/
+
 # OS
 .DS_Store
