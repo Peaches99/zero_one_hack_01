@@ -137,6 +137,14 @@ MOSFET (valid 0.76 → 0.96) yet tank IGBT (0.66 → 0.48). MOSFET and IGBT are
 structurally harder to reach from the other two (real valid 0.76 / 0.66) than IC
 (0.98).
 
+**And the differences are within noise.** Re-running `real` and `real +
+family-dropout` with three seeds each (hold-out IC) gives **identical means — OOD
+top-1 0.602 ± 0.04 for both** — with a seed-to-seed range (0.535–0.65) that *dwarfs*
+every lever gap in the tables above. The single-seed gaps that looked like wins are
+run-to-run variance. This is the cleanest check that we did not fool ourselves:
+there is no robust lever effect to find. The honest recipe is **real data** (light
+family-dropout is harmless, not helpful).
+
 Honest takeaways:
 1. **A clean small model already generalizes near its achievable limit from real
    data alone** — correct next-steps and legal routes for families it never saw.
