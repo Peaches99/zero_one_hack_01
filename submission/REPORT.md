@@ -318,10 +318,15 @@ python -m process_lm.ood_compare --hold-out ic --epochs 30
 # final model + the three tasks + before/after demo
 python -m process_lm.train --n-layer 8 --n-embd 512 --n-head 8 \
     --family-dropout 0.15 --extra-per-family 2000 --out-dir process_lm/runs/final
-python -m process_lm.anomaly --ckpt process_lm/runs/final/best.pt
-python -m process_lm.submit  --ckpt process_lm/runs/final/best.pt --selfmake
-python -m process_lm.demo    --ckpt process_lm/runs/final/best.pt
+python -m process_lm.anomaly --ckpt process_lm/runs/final/best.pt          # Task 3
+python -m process_lm.submit  --ckpt process_lm/runs/final/best.pt --selfmake --guided   # 3 task files
+python -m process_lm.demo    --ckpt process_lm/runs/final/best.pt          # before/after
+python -m process_lm.guided  --ckpt process_lm/runs/ood/igbt_real/best.pt --family igbt # guided+repair OOD
+python -m process_lm.wordlevel --hold-out ic                              # word-level negative result
 python -m process_lm.plots
+
+# (optional) a giant validated synthetic corpus across all cores
+python -m process_lm.diversify2 --n 100000 --workers 14 --out v2_synth_100k.csv --report
 ```
 
 Figures: `process_lm/runs/figures/{loss_curves,scaling,hybrid_dose,levers}.png`.
