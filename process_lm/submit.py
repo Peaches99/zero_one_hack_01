@@ -95,13 +95,17 @@ def write_nextstep(model, tok, valid_rows, device, out):
             w.writerow([eid, *preds[:5]])
 
 
-def write_completion(model, tok, valid_rows, device, out):
+def write_completion(model, tok, valid_rows, device, out, guided=False):
+    gen = None
+    if guided:
+        from .guided import complete_guided
+        gen = complete_guided
     with open(out, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["EXAMPLE_ID", "PREDICTED_SEQUENCE"])
         for row in valid_rows:
             eid, fam, _frac, partial = row[0], row[1], row[2], row[3]
-            comp = complete(model, tok, fam, partial, device)
+            comp = gen(model, tok, fam, partial, device) if gen else complete(model, tok, fam, partial, device)
             w.writerow([eid, "|".join(comp)])
 
 
@@ -132,6 +136,8 @@ def main() -> None:
     ap.add_argument("--out-dir", default="submission/out")
     ap.add_argument("--anomaly-mode", default="model", choices=["model", "oracle"])
     ap.add_argument("--anomaly-thr", type=float, default=6.0)
+    ap.add_argument("--guided", action="store_true",
+                    help="validity-guided decoding for Task 2 (guarantees rule-valid routes)")
     ap.add_argument("--device", default=None)
     args = ap.parse_args()
 
@@ -150,8 +156,9 @@ def main() -> None:
 
     if valid_rows:
         write_nextstep(model, tok, valid_rows, device, out_dir / "task1_nextstep.csv")
-        write_completion(model, tok, valid_rows, device, out_dir / "task2_completion.csv")
-        print(f"wrote task1_nextstep.csv + task2_completion.csv ({len(valid_rows)} rows)")
+        write_completion(model, tok, valid_rows, device, out_dir / "task2_completion.csv", guided=args.guided)
+        print(f"wrote task1_nextstep.csv + task2_completion.csv ({len(valid_rows)} rows, "
+              f"guided={args.guided})")
     if anomaly_rows:
         write_anomaly(model, tok, anomaly_rows, device, out_dir / "task3_anomaly.csv",
                       args.anomaly_thr, args.anomaly_mode)

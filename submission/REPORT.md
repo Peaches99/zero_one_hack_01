@@ -157,6 +157,16 @@ Honest takeaways:
 Had we tested only IC (or only MOSFET) we'd have shipped a confident,
 family-specific, and *wrong* recommendation. Cross-family robustness is the guard.
 
+**The one lever that robustly helps is at inference, not training.**
+Validity-guided decoding (`process_lm/guided.py`) — the model proposes each next
+step, the validator vetoes any choice that would introduce a rule violation —
+lifts held-out **valid-completion from 0.62 → 1.00 (IGBT)** and 0.73 → 0.82
+(MOSFET), and **never hurts** (it can only veto illegal steps). The completions are
+genuine full routes ending in `SHIP LOT`. The model supplies the process
+knowledge; the validator supplies a guardrail. This is the honest way to guarantee
+legal routes for a family the model has never seen — a model+rules hybrid, not a
+bigger model or more data.
+
 ---
 
 ## 5. Two traps we caught (the honest part)
