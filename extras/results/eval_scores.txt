@@ -1,0 +1,78 @@
+Official eval_metrics.py scores â€” GiveMeCompute / Infineon
+Tasks 1-2: held-out (n=100/family, 60/80 cuts, flagship greedy). Task 3: official 987 inputs.
+
+##### TASK 1 â€” NEXT-STEP #####
+
+============================================================
+EVAL RESULTS — NEXT-STEP PREDICTION
+============================================================
+Evaluated : 600/600 examples
+
+Top-1 Accuracy : 0.7167  (71.7%)
+Top-3 Accuracy : 1.0000  (100.0%)
+Top-5 Accuracy : 1.0000  (100.0%)
+MRR            : 0.8567
+
+By family:
+  ic        Top-1: 0.6900  Top-3: 1.0000  Top-5: 1.0000  MRR: 0.8417
+  igbt      Top-1: 0.7700  Top-3: 1.0000  Top-5: 1.0000  MRR: 0.8833
+  mosfet    Top-1: 0.6900  Top-3: 1.0000  Top-5: 1.0000  MRR: 0.8450
+
+By completion fraction:
+  0.6     Top-1: 0.7833  Top-3: 1.0000  Top-5: 1.0000  MRR: 0.8894
+  0.8     Top-1: 0.6500  Top-3: 1.0000  Top-5: 1.0000  MRR: 0.8239
+
+
+##### TASK 2 â€” COMPLETION #####
+
+============================================================
+EVAL RESULTS — SEQUENCE COMPLETION
+============================================================
+Evaluated : 600/600 examples
+
+Mean Normalized Edit Distance : 0.2172  (lower is better)
+Exact Match Rate              : 0.0067  (0.7%)
+Mean Token Accuracy           : 0.4284  (42.8%)
+Mean Block-level Accuracy     : 0.7098  (71.0%)
+
+By family:
+  ic        NED: 0.2715  Exact: 0.0000
+  igbt      NED: 0.2254  Exact: 0.0000
+  mosfet    NED: 0.1547  Exact: 0.0200
+
+By completion fraction:
+  0.6     NED: 0.2281  Exact: 0.0000
+  0.8     NED: 0.2062  Exact: 0.0133
+
+
+##### TASK 3 â€” ANOMALY #####
+  Supplemented with 600 valid examples from gt_valid.csv
+
+============================================================
+EVAL RESULTS — ANOMALY DETECTION (FORBIDDEN PATTERNS)
+============================================================
+Evaluated       : 987/987 examples
+Ground-truth    : 387 invalid  /  600 valid
+
+Binary Accuracy : 1.0000  (100.0%)
+Precision (invalid class) : 1.0000
+Recall (invalid class)    : 1.0000
+F1 (invalid class)        : 1.0000
+Confusion Matrix (invalid as positive):
+  TP=387  FP=0
+  FN=0  TN=600
+ROC-AUC         : 1.0000  (requires --valid-supplement for meaningful value)
+Rule Attribution Accuracy : 1.0000  (among 387 correctly-detected invalid sequences)
+
+Detection rate by rule:
+  RULE_BACKSIDE_BEFORE_PASSIVATION          1.00  (30/30)
+  RULE_CMP_NO_DEP                           1.00  (45/45)
+  RULE_DEP_NO_CLEAN                         1.00  (45/45)
+  RULE_ETCH_NO_MASK                         1.00  (26/26)
+  RULE_IMPLANT_NO_MASK                      1.00  (16/16)
+  RULE_LITHO_LEVEL_SKIP                     1.00  (45/45)
+  RULE_METAL_ETCH_NO_LITHO                  1.00  (45/45)
+  RULE_PAD_OPEN_BEFORE_DEP                  1.00  (45/45)
+  RULE_SHIP_BEFORE_TEST                     1.00  (45/45)
+  RULE_TEST_BEFORE_PASSIVATION              1.00  (45/45)
+
