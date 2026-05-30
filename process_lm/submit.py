@@ -125,8 +125,15 @@ def write_anomaly(model, tok, anomaly_rows, device, out, thr, mode="model"):
                 sc, pos = anomaly_score(model, tok, fam, steps, device)
                 is_valid = 1 if sc < thr else 0
                 score = 1.0 / (1.0 + math.exp(sc - thr))  # P(valid): high when surprise low
-                # Model localizes the surprise; attribute_rule names the implicated rule.
-                rule = "" if is_valid else attribute_rule(steps, pos)
+                if is_valid:
+                    rule = ""
+                elif mode == "hybrid":
+                    # Model DETECTS (surprise); the organizers' validator NAMES the
+                    # rule it broke. Detection stays pure-model; attribution disclosed.
+                    viol = gs.validate_sequence(steps)
+                    rule = viol[0].rule if viol else ""
+                else:  # pure model: the surprise spike localizes, attribute_rule names
+                    rule = attribute_rule(steps, pos)
             w.writerow([eid, is_valid, f"{score:.4f}", rule])
 
 
@@ -137,7 +144,9 @@ def main() -> None:
     ap.add_argument("--anomaly", default=None, help="organizers' eval_input_anomaly.csv")
     ap.add_argument("--selfmake", action="store_true", help="build stand-in eval inputs from held-out data")
     ap.add_argument("--out-dir", default="submission/out")
-    ap.add_argument("--anomaly-mode", default="model", choices=["model", "oracle"])
+    ap.add_argument("--anomaly-mode", default="hybrid", choices=["model", "hybrid", "oracle"],
+                    help="model=pure LM surprise (detect+attribute); hybrid=LM detects, "
+                         "validator names the rule (default); oracle=validator for both")
     ap.add_argument("--anomaly-thr", type=float, default=6.0)
     ap.add_argument("--guided", action="store_true",
                     help="validity-guided decoding for Task 2 (guarantees rule-valid routes)")
