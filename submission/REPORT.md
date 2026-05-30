@@ -213,6 +213,15 @@ pool-vocabulary leak guard; leak-free, v2 provides no top-1 gain. This is exactl
 the "don't make a biased set" failure mode, caught by watching the vocab and the
 top-1 (not just the loss).
 
+There's a deeper reason it *had* to leak: the structural diversity that would
+prepare a model for IGBT's six-mask-level routes **is** `ALIGN MASK LEVEL 5/6` —
+IGBT's own signature. You cannot teach an unseen family's novel structure without
+showing that structure, which in the proxy is leakage. Restricted to the pool's
+existing structure, v2 adds nothing the two training families don't already carry.
+For the truly unknown 4th family this is the humbling limit: **you cannot pre-train
+for structure you have never seen** — which is also why validity-guided decoding
+(§4), a rules guardrail rather than a data trick, is the lever that actually holds.
+
 ---
 
 ## 6. Why OOD top-1 is capped (the vocabulary gap)
