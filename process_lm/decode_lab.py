@@ -203,7 +203,7 @@ def score(pred, ref):
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--ckpt", default="process_lm/runs/final/best.pt")
+    ap.add_argument("--ckpt", default="submission/model/best.pt")
     ap.add_argument("--ckpt2", default="process_lm/runs/full/best.pt",
                     help="second all-3-family model for the ensemble")
     ap.add_argument("--strategies", default="greedy,guided,beam,mbr,ensemble")

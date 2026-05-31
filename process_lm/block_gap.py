@@ -89,7 +89,7 @@ def ceiling_pred(idx_frac, prefix, min_n=8):
 @torch.no_grad()
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--ckpt", default=str(_ROOT / "process_lm/runs/final/best.pt"))
+    ap.add_argument("--ckpt", default=str(_ROOT / "submission/model/best.pt"))
     ap.add_argument("--bank", type=int, default=3000)
     ap.add_argument("--queries", type=int, default=150)
     ap.add_argument("--device", default=None)
